@@ -6,7 +6,6 @@ use crate::{Core, UniposError};
 
 pub fn deposit_security(ctx: Context<DepositSecurity>, amount: u64) -> Result<()> {
     let core = &mut ctx.accounts.core;
-    require!(core.provider == ctx.accounts.provider.key(), UniposError::NotProvider);
 
     // Transfer tokens from provider to core
     let cpi_accounts = Transfer {
@@ -37,7 +36,6 @@ pub fn deposit_security(ctx: Context<DepositSecurity>, amount: u64) -> Result<()
 
 pub fn withdraw_security(ctx: Context<WithdrawSecurity>, amount: u64) -> Result<()> {
     let core = &mut ctx.accounts.core;
-    require!(core.provider == ctx.accounts.provider.key(), UniposError::NotProvider);
 
     let remaining_collateral = core.allowed_collateral - core.total_collateral;
     let withdrawable_security = get_security_deposit_by_collateral(
@@ -75,12 +73,36 @@ pub fn withdraw_security(ctx: Context<WithdrawSecurity>, amount: u64) -> Result<
     Ok(())
 }
 
+pub fn collect(ctx: Context<Collect>) -> Result<()> {
+    let core = &mut ctx.accounts.core;
+    let vault = &mut ctx.accounts.core_vault;
+    require!(core.total_collateral + core.total_security_deposit < vault.amount + core.unstaked_collateral + core.total_claimed_rewards, UniposError::NoLockedToken);
+    let extra_token = vault.amount - (core.total_collateral + core.total_security_deposit - core.unstaked_collateral - core.total_claimed_rewards);
+
+    // Transfer tokens back to provider
+    let transfer_ctx = CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        Transfer {
+            from: ctx.accounts.core_vault.to_account_info(),
+            to: ctx.accounts.provider_token_account.to_account_info(),
+            authority: ctx.accounts.core.to_account_info(),
+        }
+    );
+    let pda_sign: &[&[u8]] = &[b"core", &[ctx.bumps.core]];
+    token::transfer(transfer_ctx.with_signer(&[pda_sign]), extra_token)?;
+
+    emit!(CollectEvent{amount: extra_token});
+
+    Ok(())
+}
+
 #[derive(Accounts)]
 pub struct DepositSecurity<'info> {
     #[account(
         mut,
         seeds = [b"core"],
-        bump
+        bump,
+        has_one = provider,
     )]
     pub core: Account<'info, Core>,
 
@@ -105,7 +127,8 @@ pub struct WithdrawSecurity<'info> {
     #[account(
         mut,
         seeds = [b"core"],
-        bump
+        bump,
+        has_one = provider,
     )]
     pub core: Account<'info, Core>,
     #[account(
@@ -123,6 +146,36 @@ pub struct WithdrawSecurity<'info> {
     pub token_program: Program<'info, Token>,
 }
 
+#[derive(Accounts)]
+pub struct Collect<'info> {
+    #[account(
+        mut,
+        seeds = [b"core"],
+        bump,
+        has_one = admin,
+        has_one = provider,
+    )]
+    pub core: Account<'info, Core>,
+    #[account(
+        mut,
+        seeds = [b"core_vault"],
+        bump
+    )]
+    pub core_vault: Account<'info, TokenAccount>,
+
+    /// CHECK: no need
+    pub provider: AccountInfo<'info>,
+
+    #[account(
+        mut,
+        token::authority = provider
+    )]
+    pub provider_token_account: Account<'info, TokenAccount>,
+
+    pub admin: Signer<'info>,
+    pub token_program: Program<'info, Token>,
+}
+
 #[event]
 pub struct SecurityDepositedEvent {
     pub amount: u64,
@@ -135,6 +188,10 @@ pub struct SecurityWithdrawnEvent {
     pub remaining_security: u64,
 }
 
+#[event]
+pub struct CollectEvent {
+    pub amount: u64,
+}
 
 fn get_collateral_by_security_deposit(security_deposit: u64, apy: u64, lock_days: u64) -> u64 {
     (security_deposit * 1_000_000_000) / ((apy * lock_days as u64) / 365)

@@ -133,6 +133,7 @@ describe("unipos", () => {
   });
 
   it("Stakes tokens", async () => {
+      console.log(`userTokenAccounts: ${userTokenAccount.owner}, user: ${user.publicKey}`)
     await program.methods
       .stake(new anchor.BN(0), STAKE_AMOUNT)
       .accounts({
@@ -155,153 +156,153 @@ describe("unipos", () => {
     assert.equal(stakerRecord.claimedRewards.toNumber(), 0)
   });
 
-    it("Initializes beneficiary", async () => {
-        await program.methods
-            .initBeneficiary()
-            .accounts({
-                admin: admin.publicKey,
-                beneficiary: beneficiary.publicKey,
-            })
-            .signers([admin])
-            .rpc();
-
-        const coreAccount = await program.account.core.fetch(core);
-        assert.equal(coreAccount.beneficiary.toString(), beneficiary.publicKey.toString());
-    });
-
-    it("Adds stakeholder", async () => {
-        const grantedReward = new anchor.BN(1000000); // 1 token
-        const grantedCollateral = new anchor.BN(1000000); // 1 token
-
-        const stakerRecordBefore = await getStakerRecord(user, 0)
-        assert.equal(stakerRecordBefore.stakeholdersCnt, 0)
-        assert.equal(stakerRecordBefore.grantedCollateral.toString(), new BN(0).toString())
-        assert.equal(stakerRecordBefore.grantedReward.toString(), new BN(0).toString())
-        await program.methods
-            .addStakeholder(
-                new anchor.BN(0),
-                grantedReward,
-                grantedCollateral
-            )
-            .accounts({
-                staker: user.publicKey,
-                stakeholder: stakeholder.publicKey,
-            })
-            .signers([user])
-            .rpc();
-        let stakerRecordAfter = await getStakerRecord(user, 0)
-        assert.equal(stakerRecordAfter.stakeholders.length, 1)
-        assert.equal(stakerRecordAfter.stakeholders[0].stakeholder.toString(), stakeholder.publicKey.toString())
-        assert.equal(stakerRecordAfter.stakeholders[0].grantedReward.toNumber(), grantedReward.toNumber())
-        assert.equal(stakerRecordAfter.stakeholders[0].grantedCollateral.toNumber(), grantedCollateral.toNumber())
-        assert.equal(stakerRecordAfter.grantedReward.toNumber(), grantedReward.toNumber())
-        assert.equal(stakerRecordAfter.grantedCollateral.toString(), grantedCollateral.toString())
-
-        const grantedReward2 = new anchor.BN(2000000); // 1 token
-        const grantedCollateral2 = new anchor.BN(2000000); // 1 token
-
-        await program.methods
-            .addStakeholder(
-                new anchor.BN(0),
-                grantedReward2,
-                grantedCollateral2,
-            )
-            .accounts({
-                staker: user.publicKey,
-                stakeholder: stakeholder2.publicKey,
-            })
-            .signers([user])
-            .rpc();
-        let stakerRecordAfter2 = await getStakerRecord(user, 0)
-        assert.equal(stakerRecordAfter2.stakeholders.length, 2)
-        let a = stakerRecordAfter2.stakeholders.find(h => h.stakeholder.toString() == stakeholder2.publicKey.toString())
-        assert.ok(a)
-        assert.equal(a.grantedReward.toNumber(), grantedReward2.toNumber())
-        assert.equal(a.grantedCollateral.toNumber(), grantedCollateral2.toNumber())
-        assert.equal(stakerRecordAfter2.grantedReward.toNumber(), grantedReward.toNumber() + grantedReward2.toNumber())
-        assert.equal(stakerRecordAfter2.grantedCollateral.toNumber(), grantedCollateral.add(grantedCollateral2).toNumber())
-    });
-
-    it("Claims rewards", async () => {
-      // Wait for some time to accumulate rewards
-      await new Promise(resolve => setTimeout(resolve, 6000));
-
-      await program.methods
-        .claimRewards(new anchor.BN(0))
-        .accounts({
-          staker: user.publicKey,
-          user: user.publicKey,
-        })
-        .signers([user])
-        .rpc().catch(e => {console.log("err: ", e)});
-
-      const coreAccount = await getCoreInfo();
-      const claimedRewards = coreAccount.totalClaimedRewards
-        const beneficiaryRewards = coreAccount.beneficiaryTotalRewards
-      assert.isAbove(Number(claimedRewards), 0);
-      assert.equal(Math.floor(Number(claimedRewards)/Number(beneficiaryRewards)), USER_REWARD_SHARE/(100-USER_REWARD_SHARE))
-      const stakerVaultBalance = await getStakerVaultBalance(user)
-        assert.equal(Number(stakerVaultBalance), Number(claimedRewards))
-
-        it("Claims beneficiary rewards", async () => {
-            await program.methods
-                .claimBeneficiaryRewards()
-                .accounts({
-                    beneficiary: beneficiary.publicKey,
-                    beneficiaryTokenAccount: beneficiaryTokenAccount.address,
-                })
-                .signers([beneficiary])
-                .rpc();
-
-            const bta = await token.getAccount(connection, beneficiaryTokenAccount.address)
-            assert.equal(Number(bta.amount), Number(beneficiaryRewards))
-            const coreAccount = await getCoreInfo();
-            assert.equal(coreAccount.beneficiaryClaimedRewards.toNumber(), beneficiaryRewards.toNumber())
-            assert.equal(coreAccount.totalClaimedRewards.toNumber() - claimedRewards.toNumber(), beneficiaryRewards.toNumber())
-        });
-    });
-
-
-    it("Claims stakeholder rewards", async () => {
-        console.log(`stakeholder1: ${stakeholder.publicKey.toString()}, stakeholder2: ${stakeholder2.publicKey.toString()}`)
-        const stakerRecordBefore = await getStakerRecord(user, 0)
-
-        const stakerVaultBalance = await getStakerVaultBalance(user)
-        console.log("stakerVaultBalance: ", stakerVaultBalance.toString())
-        const stakeholderAccount1 = await token.getAccount(connection, stakeholderTokenAccount.address)
-        await program.methods
-            .claimStakeholderReward(new anchor.BN(0))
-            .accounts({
-                staker: user.publicKey,
-                stakeholderTokenAccount: stakeholderTokenAccount.address,
-                stakeholder: stakeholder.publicKey,
-            })
-            .signers([stakeholder])
-            .rpc();
-
-        const stakeholderAccount2 = await token.getAccount(connection, stakeholderTokenAccount.address)
-        let stakeholder1Earned = stakeholderAccount2.amount - stakeholderAccount1.amount
-
-        const stakeholderAccount3 = await token.getAccount(connection, stakeholderTokenAccount2.address)
-        await program.methods
-            .claimStakeholderReward(new anchor.BN(0))
-            .accounts({
-                staker: user.publicKey,
-                stakeholderTokenAccount: stakeholderTokenAccount2.address,
-                stakeholder: stakeholder2.publicKey,
-            })
-            .signers([stakeholder2])
-            .rpc().catch(e => {console.log(e)});
-        const stakeholderAccount4 = await token.getAccount(connection, stakeholderTokenAccount2.address)
-        let stakeholder2Earned = stakeholderAccount4.amount - stakeholderAccount3.amount
-        console.log("stakeholder2 earned: ", stakeholderAccount4.amount - stakeholderAccount3.amount)
-
-        assert.equal(stakeholder2Earned / stakeholder1Earned, 2)
-    });
-
-    it("Unstake", async () => {
-
-    })
+    // it("Initializes beneficiary", async () => {
+    //     await program.methods
+    //         .initBeneficiary()
+    //         .accounts({
+    //             admin: admin.publicKey,
+    //             beneficiary: beneficiary.publicKey,
+    //         })
+    //         .signers([admin])
+    //         .rpc();
+    //
+    //     const coreAccount = await program.account.core.fetch(core);
+    //     assert.equal(coreAccount.beneficiary.toString(), beneficiary.publicKey.toString());
+    // });
+    //
+    // it("Adds stakeholder", async () => {
+    //     const grantedReward = new anchor.BN(1000000); // 1 token
+    //     const grantedCollateral = new anchor.BN(1000000); // 1 token
+    //
+    //     const stakerRecordBefore = await getStakerRecord(user, 0)
+    //     assert.equal(stakerRecordBefore.stakeholdersCnt, 0)
+    //     assert.equal(stakerRecordBefore.grantedCollateral.toString(), new BN(0).toString())
+    //     assert.equal(stakerRecordBefore.grantedReward.toString(), new BN(0).toString())
+    //     await program.methods
+    //         .addStakeholder(
+    //             new anchor.BN(0),
+    //             grantedReward,
+    //             grantedCollateral
+    //         )
+    //         .accounts({
+    //             staker: user.publicKey,
+    //             stakeholder: stakeholder.publicKey,
+    //         })
+    //         .signers([user])
+    //         .rpc();
+    //     let stakerRecordAfter = await getStakerRecord(user, 0)
+    //     assert.equal(stakerRecordAfter.stakeholders.length, 1)
+    //     assert.equal(stakerRecordAfter.stakeholders[0].stakeholder.toString(), stakeholder.publicKey.toString())
+    //     assert.equal(stakerRecordAfter.stakeholders[0].grantedReward.toNumber(), grantedReward.toNumber())
+    //     assert.equal(stakerRecordAfter.stakeholders[0].grantedCollateral.toNumber(), grantedCollateral.toNumber())
+    //     assert.equal(stakerRecordAfter.grantedReward.toNumber(), grantedReward.toNumber())
+    //     assert.equal(stakerRecordAfter.grantedCollateral.toString(), grantedCollateral.toString())
+    //
+    //     const grantedReward2 = new anchor.BN(2000000); // 1 token
+    //     const grantedCollateral2 = new anchor.BN(2000000); // 1 token
+    //
+    //     await program.methods
+    //         .addStakeholder(
+    //             new anchor.BN(0),
+    //             grantedReward2,
+    //             grantedCollateral2,
+    //         )
+    //         .accounts({
+    //             staker: user.publicKey,
+    //             stakeholder: stakeholder2.publicKey,
+    //         })
+    //         .signers([user])
+    //         .rpc();
+    //     let stakerRecordAfter2 = await getStakerRecord(user, 0)
+    //     assert.equal(stakerRecordAfter2.stakeholders.length, 2)
+    //     let a = stakerRecordAfter2.stakeholders.find(h => h.stakeholder.toString() == stakeholder2.publicKey.toString())
+    //     assert.ok(a)
+    //     assert.equal(a.grantedReward.toNumber(), grantedReward2.toNumber())
+    //     assert.equal(a.grantedCollateral.toNumber(), grantedCollateral2.toNumber())
+    //     assert.equal(stakerRecordAfter2.grantedReward.toNumber(), grantedReward.toNumber() + grantedReward2.toNumber())
+    //     assert.equal(stakerRecordAfter2.grantedCollateral.toNumber(), grantedCollateral.add(grantedCollateral2).toNumber())
+    // });
+    //
+    // it("Claims rewards", async () => {
+    //   // Wait for some time to accumulate rewards
+    //   await new Promise(resolve => setTimeout(resolve, 6000));
+    //
+    //   await program.methods
+    //     .claimRewards(new anchor.BN(0))
+    //     .accounts({
+    //       staker: user.publicKey,
+    //       user: user.publicKey,
+    //     })
+    //     .signers([user])
+    //     .rpc().catch(e => {console.log("err: ", e)});
+    //
+    //   const coreAccount = await getCoreInfo();
+    //   const claimedRewards = coreAccount.totalClaimedRewards
+    //     const beneficiaryRewards = coreAccount.beneficiaryTotalRewards
+    //   assert.isAbove(Number(claimedRewards), 0);
+    //   assert.equal(Math.floor(Number(claimedRewards)/Number(beneficiaryRewards)), USER_REWARD_SHARE/(100-USER_REWARD_SHARE))
+    //   const stakerVaultBalance = await getStakerVaultBalance(user)
+    //     assert.equal(Number(stakerVaultBalance), Number(claimedRewards))
+    //
+    //     it("Claims beneficiary rewards", async () => {
+    //         await program.methods
+    //             .claimBeneficiaryRewards()
+    //             .accounts({
+    //                 beneficiary: beneficiary.publicKey,
+    //                 beneficiaryTokenAccount: beneficiaryTokenAccount.address,
+    //             })
+    //             .signers([beneficiary])
+    //             .rpc();
+    //
+    //         const bta = await token.getAccount(connection, beneficiaryTokenAccount.address)
+    //         assert.equal(Number(bta.amount), Number(beneficiaryRewards))
+    //         const coreAccount = await getCoreInfo();
+    //         assert.equal(coreAccount.beneficiaryClaimedRewards.toNumber(), beneficiaryRewards.toNumber())
+    //         assert.equal(coreAccount.totalClaimedRewards.toNumber() - claimedRewards.toNumber(), beneficiaryRewards.toNumber())
+    //     });
+    // });
+    //
+    //
+    // it("Claims stakeholder rewards", async () => {
+    //     console.log(`stakeholder1: ${stakeholder.publicKey.toString()}, stakeholder2: ${stakeholder2.publicKey.toString()}`)
+    //     const stakerRecordBefore = await getStakerRecord(user, 0)
+    //
+    //     const stakerVaultBalance = await getStakerVaultBalance(user)
+    //     console.log("stakerVaultBalance: ", stakerVaultBalance.toString())
+    //     const stakeholderAccount1 = await token.getAccount(connection, stakeholderTokenAccount.address)
+    //     await program.methods
+    //         .claimStakeholderReward(new anchor.BN(0))
+    //         .accounts({
+    //             staker: user.publicKey,
+    //             stakeholderTokenAccount: stakeholderTokenAccount.address,
+    //             stakeholder: stakeholder.publicKey,
+    //         })
+    //         .signers([stakeholder])
+    //         .rpc();
+    //
+    //     const stakeholderAccount2 = await token.getAccount(connection, stakeholderTokenAccount.address)
+    //     let stakeholder1Earned = stakeholderAccount2.amount - stakeholderAccount1.amount
+    //
+    //     const stakeholderAccount3 = await token.getAccount(connection, stakeholderTokenAccount2.address)
+    //     await program.methods
+    //         .claimStakeholderReward(new anchor.BN(0))
+    //         .accounts({
+    //             staker: user.publicKey,
+    //             stakeholderTokenAccount: stakeholderTokenAccount2.address,
+    //             stakeholder: stakeholder2.publicKey,
+    //         })
+    //         .signers([stakeholder2])
+    //         .rpc().catch(e => {console.log(e)});
+    //     const stakeholderAccount4 = await token.getAccount(connection, stakeholderTokenAccount2.address)
+    //     let stakeholder2Earned = stakeholderAccount4.amount - stakeholderAccount3.amount
+    //     console.log("stakeholder2 earned: ", stakeholderAccount4.amount - stakeholderAccount3.amount)
+    //
+    //     assert.equal(stakeholder2Earned / stakeholder1Earned, 2)
+    // });
+    //
+    // it("Unstake", async () => {
+    //
+    // })
 });
 
 

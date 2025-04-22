@@ -6,7 +6,6 @@ use crate::stake::StakerRecord;
 
 pub fn init_beneficiary(ctx: Context<InitBeneficiary>) -> Result<()> {
 	let core = &mut ctx.accounts.core;
-	require!(core.admin == ctx.accounts.admin.key(), UniposError::NotAdmin);
 	require!(core.beneficiary == Pubkey::default(), UniposError::AlreadyInitialized);
 	require!(ctx.accounts.beneficiary.key() != Pubkey::default(), UniposError::InvalidAddress);
 
@@ -52,12 +51,26 @@ pub fn claim_beneficiary_rewards(ctx: Context<ClaimBeneficiaryRewards>) -> Resul
 	Ok(())
 }
 
+pub fn transfer_provider_ownership(ctx: Context<TransferProviderOwnership>) -> Result<()> {
+	let core = &mut ctx.accounts.core;
+	core.pending_provider = ctx.accounts.new_provider.key();
+	Ok(())
+}
+
+pub fn accept_provider_ownership(ctx: Context<AcceptProviderOwnership>) -> Result<()> {
+	let core = &mut ctx.accounts.core;
+	core.provider = core.pending_provider;
+	core.pending_provider = Pubkey::default();
+	Ok(())
+}
+
 #[derive(Accounts)]
 pub struct InitBeneficiary<'info> {
     #[account(
         mut,
         seeds = [b"core"],
-        bump
+        bump,
+		has_one = admin
     )]
     pub core: Account<'info, Core>,
     pub admin: Signer<'info>,
@@ -84,6 +97,35 @@ pub struct ClaimBeneficiaryRewards<'info> {
 	)]
     pub core_vault: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
+}
+
+#[derive(Accounts)]
+pub struct TransferProviderOwnership<'info> {
+	#[account(
+        mut,
+        seeds = [b"core"],
+        bump,
+		has_one = provider,
+	)]
+	pub core: Account<'info, Core>,
+
+	/// CHECK: no need
+	pub new_provider: AccountInfo<'info>,
+
+	pub provider: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct AcceptProviderOwnership<'info> {
+	#[account(
+        mut,
+        seeds = [b"core"],
+        bump,
+		has_one = pending_provider
+	)]
+	pub core: Account<'info, Core>,
+
+	pub pending_provider: Signer<'info>,
 }
 
 #[event]

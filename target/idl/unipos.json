@@ -8,6 +8,46 @@
   },
   "instructions": [
     {
+      "name": "accept_provider_ownership",
+      "discriminator": [
+        24,
+        133,
+        189,
+        238,
+        66,
+        79,
+        251,
+        176
+      ],
+      "accounts": [
+        {
+          "name": "core",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  114,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "pending_provider",
+          "signer": true,
+          "relations": [
+            "core"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "add_stakeholder",
       "discriminator": [
         165,
@@ -287,6 +327,126 @@
       ]
     },
     {
+      "name": "claim_stakeholder_collateral",
+      "discriminator": [
+        245,
+        23,
+        46,
+        231,
+        160,
+        164,
+        210,
+        131
+      ],
+      "accounts": [
+        {
+          "name": "core",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  114,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "staker_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  101,
+                  114,
+                  95,
+                  114,
+                  101,
+                  99,
+                  111,
+                  114,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "staker"
+              },
+              {
+                "kind": "arg",
+                "path": "number"
+              }
+            ]
+          }
+        },
+        {
+          "name": "staker_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  101,
+                  114,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "staker"
+              }
+            ]
+          }
+        },
+        {
+          "name": "staker"
+        },
+        {
+          "name": "stakeholder_token_account",
+          "writable": true
+        },
+        {
+          "name": "stakeholder",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "number",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "claim_stakeholder_reward",
       "discriminator": [
         200,
@@ -407,6 +567,83 @@
       ]
     },
     {
+      "name": "collect",
+      "discriminator": [
+        208,
+        47,
+        194,
+        155,
+        17,
+        98,
+        82,
+        236
+      ],
+      "accounts": [
+        {
+          "name": "core",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  114,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "core_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  114,
+                  101,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "provider",
+          "relations": [
+            "core"
+          ]
+        },
+        {
+          "name": "provider_token_account",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "core"
+          ]
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "deposit_security",
       "discriminator": [
         189,
@@ -466,7 +703,10 @@
         {
           "name": "provider",
           "writable": true,
-          "signer": true
+          "signer": true,
+          "relations": [
+            "core"
+          ]
         },
         {
           "name": "token_program",
@@ -512,7 +752,10 @@
         },
         {
           "name": "admin",
-          "signer": true
+          "signer": true,
+          "relations": [
+            "core"
+          ]
         },
         {
           "name": "beneficiary"
@@ -780,6 +1023,49 @@
       ]
     },
     {
+      "name": "transfer_provider_ownership",
+      "discriminator": [
+        126,
+        60,
+        53,
+        84,
+        132,
+        188,
+        48,
+        54
+      ],
+      "accounts": [
+        {
+          "name": "core",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  114,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "new_provider"
+        },
+        {
+          "name": "provider",
+          "signer": true,
+          "relations": [
+            "core"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "unstake",
       "discriminator": [
         90,
@@ -979,7 +1265,10 @@
         {
           "name": "provider",
           "writable": true,
-          "signer": true
+          "signer": true,
+          "relations": [
+            "core"
+          ]
         },
         {
           "name": "token_program",
@@ -1047,6 +1336,19 @@
         12,
         83,
         86
+      ]
+    },
+    {
+      "name": "CollectEvent",
+      "discriminator": [
+        138,
+        16,
+        76,
+        55,
+        167,
+        75,
+        242,
+        47
       ]
     },
     {
@@ -1226,6 +1528,21 @@
       "code": 6016,
       "name": "StakeholderExists",
       "msg": "Stakeholder exists"
+    },
+    {
+      "code": 6017,
+      "name": "StakeholderNotExists",
+      "msg": "Stakeholder not exists"
+    },
+    {
+      "code": 6018,
+      "name": "NoLockedToken",
+      "msg": "No locked token"
+    },
+    {
+      "code": 6019,
+      "name": "NotUnstaked",
+      "msg": "Not unstaked"
     }
   ],
   "types": [
@@ -1258,12 +1575,28 @@
       }
     },
     {
+      "name": "CollectEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "Core",
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "pending_provider",
             "type": "pubkey"
           },
           {

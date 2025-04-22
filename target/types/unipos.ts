@@ -14,6 +14,46 @@ export type Unipos = {
   },
   "instructions": [
     {
+      "name": "acceptProviderOwnership",
+      "discriminator": [
+        24,
+        133,
+        189,
+        238,
+        66,
+        79,
+        251,
+        176
+      ],
+      "accounts": [
+        {
+          "name": "core",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  114,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "pendingProvider",
+          "signer": true,
+          "relations": [
+            "core"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "addStakeholder",
       "discriminator": [
         165,
@@ -293,6 +333,126 @@ export type Unipos = {
       ]
     },
     {
+      "name": "claimStakeholderCollateral",
+      "discriminator": [
+        245,
+        23,
+        46,
+        231,
+        160,
+        164,
+        210,
+        131
+      ],
+      "accounts": [
+        {
+          "name": "core",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  114,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "stakerRecord",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  101,
+                  114,
+                  95,
+                  114,
+                  101,
+                  99,
+                  111,
+                  114,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "staker"
+              },
+              {
+                "kind": "arg",
+                "path": "number"
+              }
+            ]
+          }
+        },
+        {
+          "name": "stakerVault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  101,
+                  114,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "staker"
+              }
+            ]
+          }
+        },
+        {
+          "name": "staker"
+        },
+        {
+          "name": "stakeholderTokenAccount",
+          "writable": true
+        },
+        {
+          "name": "stakeholder",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "number",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "claimStakeholderReward",
       "discriminator": [
         200,
@@ -413,6 +573,83 @@ export type Unipos = {
       ]
     },
     {
+      "name": "collect",
+      "discriminator": [
+        208,
+        47,
+        194,
+        155,
+        17,
+        98,
+        82,
+        236
+      ],
+      "accounts": [
+        {
+          "name": "core",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  114,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "coreVault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  114,
+                  101,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "provider",
+          "relations": [
+            "core"
+          ]
+        },
+        {
+          "name": "providerTokenAccount",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "core"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "depositSecurity",
       "discriminator": [
         189,
@@ -472,7 +709,10 @@ export type Unipos = {
         {
           "name": "provider",
           "writable": true,
-          "signer": true
+          "signer": true,
+          "relations": [
+            "core"
+          ]
         },
         {
           "name": "tokenProgram",
@@ -518,7 +758,10 @@ export type Unipos = {
         },
         {
           "name": "admin",
-          "signer": true
+          "signer": true,
+          "relations": [
+            "core"
+          ]
         },
         {
           "name": "beneficiary"
@@ -786,6 +1029,49 @@ export type Unipos = {
       ]
     },
     {
+      "name": "transferProviderOwnership",
+      "discriminator": [
+        126,
+        60,
+        53,
+        84,
+        132,
+        188,
+        48,
+        54
+      ],
+      "accounts": [
+        {
+          "name": "core",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  114,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "newProvider"
+        },
+        {
+          "name": "provider",
+          "signer": true,
+          "relations": [
+            "core"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "unstake",
       "discriminator": [
         90,
@@ -985,7 +1271,10 @@ export type Unipos = {
         {
           "name": "provider",
           "writable": true,
-          "signer": true
+          "signer": true,
+          "relations": [
+            "core"
+          ]
         },
         {
           "name": "tokenProgram",
@@ -1053,6 +1342,19 @@ export type Unipos = {
         12,
         83,
         86
+      ]
+    },
+    {
+      "name": "collectEvent",
+      "discriminator": [
+        138,
+        16,
+        76,
+        55,
+        167,
+        75,
+        242,
+        47
       ]
     },
     {
@@ -1232,6 +1534,21 @@ export type Unipos = {
       "code": 6016,
       "name": "stakeholderExists",
       "msg": "Stakeholder exists"
+    },
+    {
+      "code": 6017,
+      "name": "stakeholderNotExists",
+      "msg": "Stakeholder not exists"
+    },
+    {
+      "code": 6018,
+      "name": "noLockedToken",
+      "msg": "No locked token"
+    },
+    {
+      "code": 6019,
+      "name": "notUnstaked",
+      "msg": "Not unstaked"
     }
   ],
   "types": [
@@ -1264,12 +1581,28 @@ export type Unipos = {
       }
     },
     {
+      "name": "collectEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "core",
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "pendingProvider",
             "type": "pubkey"
           },
           {

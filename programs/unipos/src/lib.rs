@@ -4,12 +4,12 @@ use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 
 mod stake;
-mod beneficiary;
+mod role;
 mod stakeholder;
 mod security;
 
 use stake::*;
-use beneficiary::*;
+use role::*;
 use stakeholder::*;
 use security::*;
 
@@ -44,12 +44,20 @@ pub mod unipos {
         Ok(())
     }
 
+    pub fn transfer_provider_ownership(ctx: Context<TransferProviderOwnership>) -> Result<()> {
+        role::transfer_provider_ownership(ctx)
+    }
+
+    pub fn accept_provider_ownership(ctx: Context<AcceptProviderOwnership>) -> Result<()> {
+        role::accept_provider_ownership(ctx)
+    }
+
     pub fn init_beneficiary(ctx: Context<InitBeneficiary>) -> Result<()> {
-        beneficiary::init_beneficiary(ctx)
+        role::init_beneficiary(ctx)
     }
 
     pub fn claim_beneficiary_rewards(ctx: Context<ClaimBeneficiaryRewards>) -> Result<()> {
-        beneficiary::claim_beneficiary_rewards(ctx)
+        role::claim_beneficiary_rewards(ctx)
     }
 
     pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
@@ -68,6 +76,10 @@ pub mod unipos {
         stakeholder::claim_stakeholder_reward(ctx, number)
     }
 
+    pub fn claim_stakeholder_collateral(ctx: Context<ClaimStakeholderCollateral>, number: u64) -> Result<()> {
+        stakeholder::claim_stakeholder_collateral(ctx, number)
+    }
+
     pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
         stake::claim_rewards(ctx, number)
     }
@@ -79,6 +91,10 @@ pub mod unipos {
     pub fn withdraw_security(ctx: Context<WithdrawSecurity>, amount: u64) -> Result<()> {
         security::withdraw_security(ctx, amount)
     }
+
+    pub fn collect(ctx: Context<Collect>) -> Result<()> {
+        security::collect(ctx)
+    }
 }
 
 #[derive(Accounts)]
@@ -86,7 +102,7 @@ pub struct Initialize<'info> {
     #[account(
         init,
         payer = admin,
-        space = 8 + 12 * 8 + 4 * 32,
+        space = 8 + 12 * 8 + 5 * 32,
         seeds = [b"core"],
         bump
     )]
@@ -118,6 +134,7 @@ pub struct Initialize<'info> {
 #[account]
 pub struct Core {
     pub admin: Pubkey,
+    pub pending_provider: Pubkey,
     pub provider: Pubkey,
     pub mint: Pubkey,
     pub lock_period: u64,
@@ -175,4 +192,10 @@ pub enum UniposError {
     NotStakeholder,
     #[msg("Stakeholder exists")]
     StakeholderExists,
+    #[msg("Stakeholder not exists")]
+    StakeholderNotExists,
+    #[msg("No locked token")]
+    NoLockedToken,
+    #[msg("Not unstaked")]
+    NotUnstaked,
 }

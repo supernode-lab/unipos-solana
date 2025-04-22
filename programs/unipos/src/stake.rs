@@ -170,7 +170,6 @@ pub struct Stake<'info> {
 
     #[account(mut)]
     pub user: Signer<'info>,
-
     #[account(mut)]
     pub user_token_account: Account<'info, TokenAccount>,
 
