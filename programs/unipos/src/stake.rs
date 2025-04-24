@@ -133,7 +133,7 @@ pub struct Stake<'info> {
     #[account(
         mut,
         seeds = [b"core"],
-        bump
+        bump,
     )]
     pub core: Box<Account<'info, Core>>,
 
@@ -170,8 +170,9 @@ pub struct Stake<'info> {
 
     #[account(mut)]
     pub user: Signer<'info>,
+
     #[account(mut)]
-    pub user_token_account: Account<'info, TokenAccount>,
+    pub user_token_account: Box<Account<'info, TokenAccount>>,
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
@@ -181,8 +182,6 @@ pub struct Stake<'info> {
 #[derive(Accounts)]
 #[instruction(number: u64)]
 pub struct Unstake<'info> {
-    #[account(mut)]
-    pub user: Signer<'info>,
     #[account(
         mut,
         seeds = [b"core"],
@@ -213,6 +212,9 @@ pub struct Unstake<'info> {
         bump,
     )]
     pub staker_vault: Account<'info, TokenAccount>,
+
+    #[account(mut)]
+    pub user: Signer<'info>,
 
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,

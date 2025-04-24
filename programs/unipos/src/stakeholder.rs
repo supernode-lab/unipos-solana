@@ -45,7 +45,7 @@ pub fn add_stakeholder(ctx: Context<AddStakeholder>, number: u64, granted_reward
 	Ok(())
 }
 
-pub fn claim_stakeholder_reward(ctx: Context<ClaimStakeholderReward>, number: u64) -> Result<()> {
+pub fn claim_stakeholder_reward(ctx: Context<StakeholderClaim>, number: u64) -> Result<()> {
 	let stakeholder_key = ctx.accounts.stakeholder.key();
 	let staker_record = &mut ctx.accounts.staker_record;
 
@@ -93,7 +93,7 @@ pub fn claim_stakeholder_reward(ctx: Context<ClaimStakeholderReward>, number: u6
 	Ok(())
 }
 
-pub fn claim_stakeholder_collateral(ctx: Context<ClaimStakeholderCollateral>, number: u64) -> Result<()> {
+pub fn claim_stakeholder_collateral(ctx: Context<StakeholderClaim>, number: u64) -> Result<()> {
 	let stakeholder_key = ctx.accounts.stakeholder.key();
 	let staker_record = &mut ctx.accounts.staker_record;
 	require!(staker_record.unstaked == 1, UniposError::NotUnstaked);
@@ -154,7 +154,7 @@ pub struct AddStakeholder<'info> {
 
 #[derive(Accounts)]
 #[instruction(number: u64)]
-pub struct ClaimStakeholderReward<'info> {
+pub struct StakeholderClaim<'info> {
     #[account(
         seeds = [b"core"],
         bump
@@ -188,42 +188,6 @@ pub struct ClaimStakeholderReward<'info> {
     pub token_program: Program<'info, Token>,
 }
 
-#[derive(Accounts)]
-#[instruction(number: u64)]
-pub struct ClaimStakeholderCollateral<'info> {
-	#[account(
-        seeds = [b"core"],
-        bump
-	)]
-	pub core: Account<'info, Core>,
-
-	#[account(
-        mut,
-        seeds = [b"staker_record", staker.key().as_ref(), number.to_le_bytes().as_ref()],
-        bump
-	)]
-	pub staker_record: Account<'info, StakerRecord>,
-
-	#[account(
-        mut,
-        seeds = [b"staker_vault", staker.key().as_ref()],
-        bump,
-	)]
-	pub staker_vault: Account<'info, TokenAccount>,
-
-	/// CHECK: no need
-	pub staker: AccountInfo<'info>,
-
-	#[account(mut)]
-	pub stakeholder_token_account: Account<'info, TokenAccount>,
-
-	#[account(mut)]
-	pub stakeholder: Signer<'info>,
-
-	pub system_program: Program<'info, System>,
-	pub token_program: Program<'info, Token>,
-}
-
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
 pub struct StakeholderInfo {
 	pub stakeholder: Pubkey,
@@ -232,7 +196,6 @@ pub struct StakeholderInfo {
 	pub granted_collateral: u64,
 	pub claimed_collateral: u64,
 }
-
 
 #[event]
 pub struct StakeholderAddedEvent {

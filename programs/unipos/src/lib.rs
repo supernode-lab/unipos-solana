@@ -72,11 +72,11 @@ pub mod unipos {
         stakeholder::add_stakeholder(ctx, number, granted_reward, granted_collateral)
     }
 
-    pub fn claim_stakeholder_reward(ctx: Context<ClaimStakeholderReward>, number: u64) -> Result<()> {
+    pub fn claim_stakeholder_reward(ctx: Context<StakeholderClaim>, number: u64) -> Result<()> {
         stakeholder::claim_stakeholder_reward(ctx, number)
     }
 
-    pub fn claim_stakeholder_collateral(ctx: Context<ClaimStakeholderCollateral>, number: u64) -> Result<()> {
+    pub fn claim_stakeholder_collateral(ctx: Context<StakeholderClaim>, number: u64) -> Result<()> {
         stakeholder::claim_stakeholder_collateral(ctx, number)
     }
 
@@ -92,8 +92,8 @@ pub mod unipos {
         security::withdraw_security(ctx, amount)
     }
 
-    pub fn collect(ctx: Context<Collect>) -> Result<()> {
-        security::collect(ctx)
+    pub fn collect_from_pool(ctx: Context<CollectFromPool>) -> Result<()> {
+        security::collect_from_pool(ctx)
     }
 }
 

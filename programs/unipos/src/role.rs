@@ -54,13 +54,22 @@ pub fn claim_beneficiary_rewards(ctx: Context<ClaimBeneficiaryRewards>) -> Resul
 pub fn transfer_provider_ownership(ctx: Context<TransferProviderOwnership>) -> Result<()> {
 	let core = &mut ctx.accounts.core;
 	core.pending_provider = ctx.accounts.new_provider.key();
+	emit!(OwnershipTransferredEvent{
+		old: core.provider.key(),
+		new: core.pending_provider.key(),
+	});
 	Ok(())
 }
 
 pub fn accept_provider_ownership(ctx: Context<AcceptProviderOwnership>) -> Result<()> {
 	let core = &mut ctx.accounts.core;
+	let old = core.provider;
 	core.provider = core.pending_provider;
 	core.pending_provider = Pubkey::default();
+	emit!(OwnershipTransferAcceptedEvent{
+		old,
+		new: core.provider.key(),
+	});
 	Ok(())
 }
 
@@ -137,4 +146,16 @@ pub struct BeneficiaryInitializedEvent {
 pub struct BeneficiaryRewardsClaimedEvent {
     pub beneficiary: Pubkey,
     pub amount: u64,
+}
+
+#[event]
+pub struct OwnershipTransferredEvent {
+	pub old: Pubkey,
+	pub new: Pubkey,
+}
+
+#[event]
+pub struct OwnershipTransferAcceptedEvent {
+	pub old: Pubkey,
+	pub new: Pubkey,
 }

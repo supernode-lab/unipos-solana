@@ -573,16 +573,16 @@ export type Unipos = {
       ]
     },
     {
-      "name": "collect",
+      "name": "collectFromPool",
       "discriminator": [
-        208,
-        47,
-        194,
-        155,
-        17,
-        98,
-        82,
-        236
+        71,
+        254,
+        193,
+        185,
+        5,
+        42,
+        34,
+        188
       ],
       "accounts": [
         {
@@ -1085,11 +1085,6 @@ export type Unipos = {
       ],
       "accounts": [
         {
-          "name": "user",
-          "writable": true,
-          "signer": true
-        },
-        {
           "name": "core",
           "writable": true,
           "pda": {
@@ -1194,6 +1189,11 @@ export type Unipos = {
               }
             ]
           }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
         },
         {
           "name": "tokenProgram",

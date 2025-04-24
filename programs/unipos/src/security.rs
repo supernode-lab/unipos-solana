@@ -73,7 +73,7 @@ pub fn withdraw_security(ctx: Context<WithdrawSecurity>, amount: u64) -> Result<
     Ok(())
 }
 
-pub fn collect(ctx: Context<Collect>) -> Result<()> {
+pub fn collect_from_pool(ctx: Context<CollectFromPool>) -> Result<()> {
     let core = &mut ctx.accounts.core;
     let vault = &mut ctx.accounts.core_vault;
     require!(core.total_collateral + core.total_security_deposit < vault.amount + core.unstaked_collateral + core.total_claimed_rewards, UniposError::NoLockedToken);
@@ -147,7 +147,7 @@ pub struct WithdrawSecurity<'info> {
 }
 
 #[derive(Accounts)]
-pub struct Collect<'info> {
+pub struct CollectFromPool<'info> {
     #[account(
         mut,
         seeds = [b"core"],
