@@ -39,12 +39,13 @@ let stakeholderTokenAccount3: token.Account;
 // const LOCK_PERIOD = 30 * 86400;
 const LOCK_PERIOD = 30;
 const USER_REWARD_SHARE = 80; // 80%
-const APY = 1000; // 10%
+const APY = 1000; // 1000%
 const MIN_STAKE_AMOUNT = new anchor.BN(1000000); // 1 token
 // const INSTALLMENT_NUM = 86400 * 10; // grant rewards for every 3 seconds
 const INSTALLMENT_NUM = 10;
 const STAKE_AMOUNT = new anchor.BN(10000000); // 10 tokens
 const SECURITY_DEPOSIT = new anchor.BN(100000000); // 100 tokens
+const HALF_SECURITY_DEPOSIT = new anchor.BN(50000000); // 50 tokens
 
 async function prepare() {
   admin = await createAccount();
@@ -97,12 +98,12 @@ describe("unipos", () => {
       provider1.publicKey.toString()
     );
     assert.equal(coreAccount.mint.toString(), mint.publicKey.toString());
-    assert.equal(coreAccount.lockPeriod.toString(), LOCK_PERIOD.toString());
+    assert.equal(coreAccount.lockPeriodSecs.toString(), LOCK_PERIOD.toString());
     assert.equal(
       coreAccount.userRewardShare.toString(),
       USER_REWARD_SHARE.toString()
     );
-    assert.equal(coreAccount.apy.toString(), APY.toString());
+    assert.equal(coreAccount.apyPercentage.toString(), APY.toString());
     assert.equal(
       coreAccount.minStakeAmount.toString(),
       MIN_STAKE_AMOUNT.toString()
@@ -135,11 +136,9 @@ describe("unipos", () => {
       infoAfter.allowedCollateral.toString() > new anchor.BN(0).toString()
     );
 
-    const withdrawAmount = new anchor.BN(50000000); // 50 tokens
-
     let err;
     await program.methods
-      .withdrawSecurity(withdrawAmount)
+      .withdrawSecurity(HALF_SECURITY_DEPOSIT)
       .accounts({
         providerTokenAccount: provider2TokenAccount.address,
         provider: provider2.publicKey,
@@ -152,19 +151,34 @@ describe("unipos", () => {
     assert.ok(err.toString().includes("Error Code: ConstraintHasOne"));
 
     await program.methods
-      .withdrawSecurity(withdrawAmount)
+      .withdrawSecurity(HALF_SECURITY_DEPOSIT)
       .accounts({
         providerTokenAccount: provider1TokenAccount.address,
         provider: provider1.publicKey,
       })
       .signers([provider1])
-      .rpc();
+      .rpc().catch(e=>{console.log("withdraw first time: ", e)});
 
     const coreAccount = await getCoreInfo();
     assert.equal(
-      coreAccount.totalSecurityDeposit.toString(),
-      SECURITY_DEPOSIT.sub(withdrawAmount).toString()
+        coreAccount.totalSecurityDeposit.toString(),
+        HALF_SECURITY_DEPOSIT.toString()
     );
+
+    await program.methods
+        .withdrawSecurity(HALF_SECURITY_DEPOSIT)
+        .accounts({
+          providerTokenAccount: provider1TokenAccount.address,
+          provider: provider1.publicKey,
+        })
+        .signers([provider1])
+        .rpc().catch(e=>{console.log("withdraw second time: ", e)});
+    const coreAccount2 = await getCoreInfo();
+    assert.equal(
+        coreAccount2.totalSecurityDeposit.toString(),
+        "0"
+    );
+
 
     await program.methods
       .transferProviderOwnership()
@@ -187,6 +201,15 @@ describe("unipos", () => {
       .rpc();
     const ca1 = await getCoreInfo();
     assert.equal(ca1.provider.toString(), provider2.publicKey.toString());
+
+    await program.methods
+        .depositSecurity(SECURITY_DEPOSIT)
+        .accounts({
+          providerTokenAccount: provider2TokenAccount.address,
+          provider: provider2.publicKey,
+        })
+        .signers([provider2])
+        .rpc();
   });
 
   it("Stakes tokens", async () => {
@@ -210,8 +233,8 @@ describe("unipos", () => {
     const stakerRecord = await getStakerRecord(user, 0);
     assert.equal(stakerRecord.staker.toString(), user.publicKey.toString());
     assert.equal(
-      stakerRecord.lockPeriod.toNumber(),
-      coreAccount.lockPeriod.toNumber()
+      stakerRecord.lockPeriodSecs.toNumber(),
+      coreAccount.lockPeriodSecs.toNumber()
     );
     assert.equal(stakerRecord.collateral.toNumber(), STAKE_AMOUNT.toNumber());
     assert.equal(stakerRecord.unstaked.toString(), new BN(0).toString());

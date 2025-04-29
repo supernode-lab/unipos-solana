@@ -1358,6 +1358,32 @@ export type Unipos = {
       ]
     },
     {
+      "name": "ownershipTransferAcceptedEvent",
+      "discriminator": [
+        126,
+        181,
+        34,
+        172,
+        117,
+        212,
+        151,
+        5
+      ]
+    },
+    {
+      "name": "ownershipTransferredEvent",
+      "discriminator": [
+        64,
+        151,
+        32,
+        57,
+        187,
+        155,
+        242,
+        84
+      ]
+    },
+    {
       "name": "rewardsClaimedEvent",
       "discriminator": [
         22,
@@ -1614,7 +1640,7 @@ export type Unipos = {
             "type": "pubkey"
           },
           {
-            "name": "lockPeriod",
+            "name": "lockPeriodSecs",
             "type": "u64"
           },
           {
@@ -1622,7 +1648,7 @@ export type Unipos = {
             "type": "u64"
           },
           {
-            "name": "apy",
+            "name": "apyPercentage",
             "type": "u64"
           },
           {
@@ -1664,6 +1690,38 @@ export type Unipos = {
           {
             "name": "beneficiaryClaimedRewards",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ownershipTransferAcceptedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "old",
+            "type": "pubkey"
+          },
+          {
+            "name": "new",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ownershipTransferredEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "old",
+            "type": "pubkey"
+          },
+          {
+            "name": "new",
+            "type": "pubkey"
           }
         ]
       }
@@ -1826,7 +1884,7 @@ export type Unipos = {
             "type": "u64"
           },
           {
-            "name": "lockPeriod",
+            "name": "lockPeriodSecs",
             "type": "u64"
           },
           {

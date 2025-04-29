@@ -4,6 +4,8 @@ use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 use crate::{Core, UniposError};
 
+const SECONDS_PER_DAY: u128 = 86400;
+
 pub fn deposit_security(ctx: Context<DepositSecurity>, amount: u64) -> Result<()> {
     let core = &mut ctx.accounts.core;
 
@@ -21,9 +23,9 @@ pub fn deposit_security(ctx: Context<DepositSecurity>, amount: u64) -> Result<()
 
     core.total_security_deposit += amount;
     core.allowed_collateral = get_collateral_by_security_deposit(
-        core.total_security_deposit,
-        core.apy,
-        core.lock_period,
+        core.total_security_deposit as u128,
+        core.apy_percentage as u128,
+        core.lock_period_secs as u128,
     );
 
     emit!(SecurityDepositedEvent {
@@ -39,17 +41,17 @@ pub fn withdraw_security(ctx: Context<WithdrawSecurity>, amount: u64) -> Result<
 
     let remaining_collateral = core.allowed_collateral - core.total_collateral;
     let withdrawable_security = get_security_deposit_by_collateral(
-        remaining_collateral,
-        core.apy,
-        core.lock_period,
+        remaining_collateral as u128,
+        core.apy_percentage as u128,
+        core.lock_period_secs as u128,
     );
     require!(withdrawable_security >= amount, UniposError::InsufficientSecurity);
 
     core.total_security_deposit -= amount;
     core.allowed_collateral = get_collateral_by_security_deposit(
-        core.total_security_deposit,
-        core.apy,
-        core.lock_period,
+        core.total_security_deposit as u128,
+        core.apy_percentage as u128,
+        core.lock_period_secs as u128,
     );
     let total_security_deposit = core.total_security_deposit;
 
@@ -193,10 +195,15 @@ pub struct CollectEvent {
     pub amount: u64,
 }
 
-fn get_collateral_by_security_deposit(security_deposit: u64, apy: u64, lock_days: u64) -> u64 {
-    (security_deposit * 1_000_000_000) / ((apy * lock_days as u64) / 365)
+// collateral * apy * lock_days / 365 = security
+// lock_days = lock_secs / SECONDS_PER_DAY
+// so collateral = security * 365 * SECONDS_PER_DAY * 100 / (apy_percentage * lock_secs)
+fn get_collateral_by_security_deposit(security_deposit: u128, apy_percentage: u128, lock_secs: u128) -> u64 {
+    ((security_deposit * 100 * 365 * SECONDS_PER_DAY) / (apy_percentage * lock_secs)) as u64
 }
 
-fn get_security_deposit_by_collateral(collateral: u64, apy: u64, lock_days: u64) -> u64 {
-    (collateral * ((apy * lock_days as u64) / 365)) / 1_000_000_000
+// collateral * apy * lock_days / 365 = security
+// lock_days = lock_secs / SECONDS_PER_DAY
+fn get_security_deposit_by_collateral(collateral: u128, apy_percentage: u128, lock_secs: u128) -> u64 {
+    ((((collateral * apy_percentage * lock_secs) / 365) / SECONDS_PER_DAY) / 100) as u64
 }

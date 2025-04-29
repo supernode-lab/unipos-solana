@@ -30,11 +30,11 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
     staker_record.staker = ctx.accounts.staker.key();
     staker_record.collateral = amount;
     staker_record.start_time = Clock::get()?.unix_timestamp as u64;
-    staker_record.lock_period = ctx.accounts.core.lock_period;
+    staker_record.lock_period_secs = ctx.accounts.core.lock_period_secs;
     staker_record.locked_rewards = calculate_user_rewards(
         amount,
-        ctx.accounts.core.apy,
-        ctx.accounts.core.lock_period,
+        ctx.accounts.core.apy_percentage,
+        ctx.accounts.core.lock_period_secs,
         ctx.accounts.core.user_reward_share,
     );
     staker_record.claimed_rewards = 0;
@@ -48,7 +48,7 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
             user: ctx.accounts.user.key(),
             amount,
             start_time: Clock::get()?.unix_timestamp as u64,
-            lock_days: ctx.accounts.core.lock_period,
+            lock_days: ctx.accounts.core.lock_period_secs,
         });
 
     Ok(())
@@ -59,7 +59,7 @@ pub fn unstake(ctx: Context<Unstake>, number: u64) -> Result<()> {
     require!(staker_record.staker == ctx.accounts.user.key(), UniposError::NotOwner);
 
     require!(
-        Clock::get()?.unix_timestamp as u64 >= staker_record.start_time + staker_record.lock_period,
+        Clock::get()?.unix_timestamp as u64 >= staker_record.start_time + staker_record.lock_period_secs,
         UniposError::LockPeriodNotEnded
     );
     require!(staker_record.unstaked == 0, UniposError::AlreadyClaimed);
@@ -267,7 +267,7 @@ pub struct StakerRecord {
     pub staker: Pubkey,
     pub collateral: u64,
     pub start_time: u64,
-    pub lock_period: u64,
+    pub lock_period_secs: u64,
     pub locked_rewards: u64,
     pub claimed_rewards: u64,
     pub unstaked: u8,
@@ -315,10 +315,10 @@ impl Default for StakerRecord {
 fn get_unlocked_installment_rewards(staker_record: &StakerRecord, installment_num: u64) -> u64 {
     let total_rewards = staker_record.claimed_rewards + staker_record.locked_rewards;
     let elapsed_time = Clock::get().unwrap().unix_timestamp as u64 - staker_record.start_time;
-    let unlocked_phase = if elapsed_time >= staker_record.lock_period {
+    let unlocked_phase = if elapsed_time >= staker_record.lock_period_secs {
         installment_num
     } else {
-        (elapsed_time * installment_num) / staker_record.lock_period
+        (elapsed_time * installment_num) / staker_record.lock_period_secs
     };
     (total_rewards / installment_num) * unlocked_phase
 }

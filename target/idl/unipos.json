@@ -1352,6 +1352,32 @@
       ]
     },
     {
+      "name": "OwnershipTransferAcceptedEvent",
+      "discriminator": [
+        126,
+        181,
+        34,
+        172,
+        117,
+        212,
+        151,
+        5
+      ]
+    },
+    {
+      "name": "OwnershipTransferredEvent",
+      "discriminator": [
+        64,
+        151,
+        32,
+        57,
+        187,
+        155,
+        242,
+        84
+      ]
+    },
+    {
       "name": "RewardsClaimedEvent",
       "discriminator": [
         22,
@@ -1608,7 +1634,7 @@
             "type": "pubkey"
           },
           {
-            "name": "lock_period",
+            "name": "lock_period_secs",
             "type": "u64"
           },
           {
@@ -1616,7 +1642,7 @@
             "type": "u64"
           },
           {
-            "name": "apy",
+            "name": "apy_percentage",
             "type": "u64"
           },
           {
@@ -1658,6 +1684,38 @@
           {
             "name": "beneficiary_claimed_rewards",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OwnershipTransferAcceptedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "old",
+            "type": "pubkey"
+          },
+          {
+            "name": "new",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OwnershipTransferredEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "old",
+            "type": "pubkey"
+          },
+          {
+            "name": "new",
+            "type": "pubkey"
           }
         ]
       }
@@ -1820,7 +1878,7 @@
             "type": "u64"
           },
           {
-            "name": "lock_period",
+            "name": "lock_period_secs",
             "type": "u64"
           },
           {

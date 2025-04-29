@@ -31,9 +31,9 @@ pub mod unipos {
         core.admin = ctx.accounts.admin.key();
         core.provider = ctx.accounts.provider.key();
         core.mint = ctx.accounts.mint.key();
-        core.lock_period = lock_period;
+        core.lock_period_secs = lock_period;
         core.user_reward_share = user_reward_share;
-        core.apy = apy;
+        core.apy_percentage = apy;
         core.min_stake_amount = min_stake_amount;
         core.installment_num = installment_num;
         core.total_collateral = 0;
@@ -137,9 +137,9 @@ pub struct Core {
     pub pending_provider: Pubkey,
     pub provider: Pubkey,
     pub mint: Pubkey,
-    pub lock_period: u64,
+    pub lock_period_secs: u64,
     pub user_reward_share: u64,
-    pub apy: u64,
+    pub apy_percentage: u64,
     pub min_stake_amount: u64,
     pub installment_num: u64,
 
