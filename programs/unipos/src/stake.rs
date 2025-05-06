@@ -32,10 +32,10 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
     staker_record.start_time = Clock::get()?.unix_timestamp as u64;
     staker_record.lock_period_secs = ctx.accounts.core.lock_period_secs;
     staker_record.locked_rewards = calculate_user_rewards(
-        amount,
-        ctx.accounts.core.apy_percentage,
-        ctx.accounts.core.lock_period_secs,
-        ctx.accounts.core.user_reward_share,
+        amount as u128,
+        ctx.accounts.core.apy_percentage as u128,
+        ctx.accounts.core.lock_period_secs as u128,
+        ctx.accounts.core.user_reward_share as u128,
     );
     staker_record.claimed_rewards = 0;
     staker_record.unstaked = 0;
@@ -91,6 +91,7 @@ pub fn unstake(ctx: Context<Unstake>, number: u64) -> Result<()> {
 pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
     let staker_record = &mut ctx.accounts.staker_record;
     let total_unlocked = get_unlocked_installment_rewards(
+        Clock::get().unwrap().unix_timestamp as u64,
         staker_record,
         ctx.accounts.core.installment_num,
     );
@@ -298,9 +299,9 @@ pub struct RewardsClaimedEvent {
     pub amount: u64,
 }
 
-fn calculate_user_rewards(amount: u64, apy: u64, lock_period: u64, user_reward_share: u64) -> u64 {
-    let total_rewards = (amount * apy * lock_period as u64) / (365 * 86400);
-    (total_rewards * user_reward_share) / 100
+fn calculate_user_rewards(amount: u128, apy_percentage: u128, lock_period_secs: u128, user_reward_share: u128) -> u64 {
+    let total_rewards = (amount * apy_percentage * lock_period_secs) / (100 * 365 * 86400);
+    ((total_rewards * user_reward_share) / 100) as u64
 }
 
 impl Default for StakerRecord {
@@ -312,13 +313,51 @@ impl Default for StakerRecord {
     }
 }
 
-fn get_unlocked_installment_rewards(staker_record: &StakerRecord, installment_num: u64) -> u64 {
+fn get_unlocked_installment_rewards(now: u64, staker_record: &StakerRecord, installment_num: u64) -> u64 {
     let total_rewards = staker_record.claimed_rewards + staker_record.locked_rewards;
-    let elapsed_time = Clock::get().unwrap().unix_timestamp as u64 - staker_record.start_time;
+    let elapsed_time = now - staker_record.start_time;
     let unlocked_phase = if elapsed_time >= staker_record.lock_period_secs {
         installment_num
     } else {
         (elapsed_time * installment_num) / staker_record.lock_period_secs
     };
     (total_rewards / installment_num) * unlocked_phase
+}
+
+#[cfg(test)]
+mod test {
+    use crate::stake::{calculate_user_rewards, get_unlocked_installment_rewards, StakerRecord};
+
+    #[test]
+    fn test_calculate_user_rewards() {
+        let cases = vec![
+            (200_000_000_000, 160, 15552000, 100), // 160%, 180 days, 100% user share
+        ];
+        for case in cases {
+            let o = calculate_user_rewards(case.0, case.1, case.2, case.3);
+            assert!(o > 157_000_000_000);
+            assert!(o < 158_000_000_000);
+        }
+    }
+
+    #[test]
+    fn test_get_unlocked_installment_rewards() {
+        let now = 86400 * 3;
+        let staker_record = StakerRecord {
+            staker: Default::default(),
+            collateral: 200000000000,
+            start_time: 86400,
+            lock_period_secs: 15552000,
+            locked_rewards: 157_000_000_000,
+            claimed_rewards: 0,
+            unstaked: 0,
+            granted_reward: 0,
+            granted_collateral: 0,
+            stakeholders: vec![],
+            stakeholders_cnt: 0,
+        };
+        let installment_num = 180;
+        let a = get_unlocked_installment_rewards(now, &staker_record, installment_num);
+        assert_eq!(a, 1_744_444_444);
+    }
 }

@@ -258,8 +258,8 @@ describe("unipos", () => {
     );
   });
 
-  it("Adds stakeholder", async () => {
-    const grantedReward = new anchor.BN(100);
+  it("Add stakeholder", async () => {
+    const grantedReward = new anchor.BN(10);
     const grantedCollateral = new anchor.BN(1000000); // 1 token
 
     const stakerRecordBefore = await getStakerRecord(user, 0);
@@ -272,6 +272,7 @@ describe("unipos", () => {
       stakerRecordBefore.grantedReward.toString(),
       new BN(0).toString()
     );
+
     await program.methods
       .addStakeholder(new anchor.BN(0), grantedReward, grantedCollateral)
       .accounts({
@@ -303,7 +304,7 @@ describe("unipos", () => {
       grantedCollateral.toString()
     );
 
-    const grantedReward2 = new anchor.BN(200); // 1 token
+    const grantedReward2 = new anchor.BN(20);
     const grantedCollateral2 = new anchor.BN(2000000); // 2 token
 
     await program.methods
@@ -334,7 +335,7 @@ describe("unipos", () => {
 
   it("Claims rewards", async () => {
     // Wait for some time to accumulate rewards
-    await new Promise((resolve) => setTimeout(resolve, 6000));
+    await new Promise((resolve) => setTimeout(resolve, 7000));
 
     await program.methods
       .claimRewards(new anchor.BN(0))
@@ -434,7 +435,6 @@ describe("unipos", () => {
     );
     let stakeholder2Earned =
       stakeholderAccount4.amount - stakeholderAccount3.amount;
-
     assert.equal(stakeholder2Earned / stakeholder1Earned, 2);
   });
 

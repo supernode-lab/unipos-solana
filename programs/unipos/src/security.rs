@@ -9,6 +9,12 @@ const SECONDS_PER_DAY: u128 = 86400;
 pub fn deposit_security(ctx: Context<DepositSecurity>, amount: u64) -> Result<()> {
     let core = &mut ctx.accounts.core;
 
+    let (collateral, security) = get_collateral_by_security_deposit(
+        amount as u128,
+        core.apy_percentage as u128,
+        core.lock_period_secs as u128,
+    );
+
     // Transfer tokens from provider to core
     let cpi_accounts = Transfer {
         from: ctx.accounts.provider_token_account.to_account_info(),
@@ -19,17 +25,13 @@ pub fn deposit_security(ctx: Context<DepositSecurity>, amount: u64) -> Result<()
         ctx.accounts.token_program.to_account_info(),
         cpi_accounts,
     );
-    token::transfer(cpi_ctx, amount)?;
+    token::transfer(cpi_ctx, security)?;
 
-    core.total_security_deposit += amount;
-    core.allowed_collateral = get_collateral_by_security_deposit(
-        core.total_security_deposit as u128,
-        core.apy_percentage as u128,
-        core.lock_period_secs as u128,
-    );
+    core.total_security_deposit += security;
+    core.allowed_collateral = collateral;
 
     emit!(SecurityDepositedEvent {
-            amount,
+            amount: security,
             total_security: core.total_security_deposit,
         });
 
@@ -47,12 +49,15 @@ pub fn withdraw_security(ctx: Context<WithdrawSecurity>, amount: u64) -> Result<
     );
     require!(withdrawable_security >= amount, UniposError::InsufficientSecurity);
 
-    core.total_security_deposit -= amount;
-    core.allowed_collateral = get_collateral_by_security_deposit(
-        core.total_security_deposit as u128,
+    let (collateral, security) = get_collateral_by_security_deposit(
+        (core.total_security_deposit - amount) as u128,
         core.apy_percentage as u128,
         core.lock_period_secs as u128,
     );
+    core.allowed_collateral = collateral;
+    let withdraw_amount = core.total_security_deposit - security;
+    core.total_security_deposit = security;
+
     let total_security_deposit = core.total_security_deposit;
 
     // Transfer tokens back to provider
@@ -65,10 +70,10 @@ pub fn withdraw_security(ctx: Context<WithdrawSecurity>, amount: u64) -> Result<
         }
     );
     let pda_sign: &[&[u8]] = &[b"core", &[ctx.bumps.core]];
-    token::transfer(transfer_ctx.with_signer(&[pda_sign]), amount)?;
+    token::transfer(transfer_ctx.with_signer(&[pda_sign]), withdraw_amount)?;
 
     emit!(SecurityWithdrawnEvent {
-            amount,
+            amount: withdraw_amount,
             remaining_security: total_security_deposit,
         });
 
@@ -198,12 +203,39 @@ pub struct CollectEvent {
 // collateral * apy * lock_days / 365 = security
 // lock_days = lock_secs / SECONDS_PER_DAY
 // so collateral = security * 365 * SECONDS_PER_DAY * 100 / (apy_percentage * lock_secs)
-fn get_collateral_by_security_deposit(security_deposit: u128, apy_percentage: u128, lock_secs: u128) -> u64 {
-    ((security_deposit * 100 * 365 * SECONDS_PER_DAY) / (apy_percentage * lock_secs)) as u64
+fn get_collateral_by_security_deposit(security_deposit: u128, apy_percentage: u128, lock_secs: u128) -> (u64, u64) {
+    let numerator = security_deposit * 100 * 365 * SECONDS_PER_DAY;
+    let denominator = apy_percentage * lock_secs;
+    let collateral = numerator / denominator;
+    let mut security = security_deposit;
+    if numerator % denominator > 0 {
+        security = (collateral * denominator) / (100 * 365 * SECONDS_PER_DAY);
+    }
+    (collateral as u64, security as u64)
 }
 
 // collateral * apy * lock_days / 365 = security
 // lock_days = lock_secs / SECONDS_PER_DAY
 fn get_security_deposit_by_collateral(collateral: u128, apy_percentage: u128, lock_secs: u128) -> u64 {
-    ((((collateral * apy_percentage * lock_secs) / 365) / SECONDS_PER_DAY) / 100) as u64
+    let numerator = collateral * apy_percentage * lock_secs;
+    let denominator = 365 * SECONDS_PER_DAY * 100;
+    (numerator / denominator) as u64
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::security::{get_collateral_by_security_deposit, get_security_deposit_by_collateral};
+
+    #[test]
+    fn test_get_collateral_by_security_deposit() {
+        let (collateral, security) = get_collateral_by_security_deposit(5000_000_000_000, 160, 15552000);
+        assert_eq!(security, 4999_999_999_999);
+        assert_eq!(collateral, 6336_805_555_555);
+    }
+
+    #[test]
+    fn test_get_security_deposit_by_collateral() {
+        let security = get_security_deposit_by_collateral(6336_805_555_555, 160, 15552000);
+        assert_eq!(security, 4999_999_999_999);
+    }
 }
