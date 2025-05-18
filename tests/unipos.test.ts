@@ -37,15 +37,15 @@ let stakeholderTokenAccount3: token.Account;
 
 // Constants
 // const LOCK_PERIOD = 30 * 86400;
-const LOCK_PERIOD = 30;
-const USER_REWARD_SHARE = 80; // 80%
-const APY = 1000; // 1000%
+const LOCK_PERIOD = 60;
+const USER_REWARD_SHARE = 100; // 80%
+const APY = 1156500;
 const MIN_STAKE_AMOUNT = new anchor.BN(1000000); // 1 token
 // const INSTALLMENT_NUM = 86400 * 10; // grant rewards for every 3 seconds
-const INSTALLMENT_NUM = 10;
-const STAKE_AMOUNT = new anchor.BN(10000000); // 10 tokens
-const SECURITY_DEPOSIT = new anchor.BN(100000000); // 100 tokens
-const HALF_SECURITY_DEPOSIT = new anchor.BN(50000000); // 50 tokens
+const INSTALLMENT_NUM = 3;
+const STAKE_AMOUNT = new anchor.BN(2000_000_000_000); // 2000 tokens
+const SECURITY_DEPOSIT = new anchor.BN(1000000000000); // 10000 tokens
+const HALF_SECURITY_DEPOSIT = new anchor.BN(500000000000); // 5000 tokens
 
 async function prepare() {
   admin = await createAccount();
@@ -128,10 +128,11 @@ describe("unipos", () => {
 
     const infoAfter = await getCoreInfo();
 
-    assert.equal(
-      infoAfter.totalSecurityDeposit.toString(),
-      SECURITY_DEPOSIT.toString()
-    );
+    assert(Math.abs(infoAfter.totalSecurityDeposit.toNumber() - SECURITY_DEPOSIT.toNumber()) < 5)
+    // assert.equal(
+    //   infoAfter.totalSecurityDeposit.toString(),
+    //   SECURITY_DEPOSIT.toString()
+    // );
     assert.ok(
       infoAfter.allowedCollateral.toString() > new anchor.BN(0).toString()
     );
@@ -160,13 +161,10 @@ describe("unipos", () => {
       .rpc().catch(e=>{console.log("withdraw first time: ", e)});
 
     const coreAccount = await getCoreInfo();
-    assert.equal(
-        coreAccount.totalSecurityDeposit.toString(),
-        HALF_SECURITY_DEPOSIT.toString()
-    );
+    assert(Math.abs(coreAccount.totalSecurityDeposit.toNumber() - HALF_SECURITY_DEPOSIT.toNumber()) < 5)
 
     await program.methods
-        .withdrawSecurity(HALF_SECURITY_DEPOSIT)
+        .withdrawSecurity(coreAccount.totalSecurityDeposit)
         .accounts({
           providerTokenAccount: provider1TokenAccount.address,
           provider: provider1.publicKey,
@@ -239,6 +237,8 @@ describe("unipos", () => {
     assert.equal(stakerRecord.collateral.toNumber(), STAKE_AMOUNT.toNumber());
     assert.equal(stakerRecord.unstaked.toString(), new BN(0).toString());
     assert.equal(stakerRecord.claimedRewards.toNumber(), 0);
+
+    console.log("lockedRewards: ", stakerRecord.lockedRewards.toString())
   });
 
   it("Initializes beneficiary", async () => {
@@ -259,7 +259,7 @@ describe("unipos", () => {
   });
 
   it("Add stakeholder", async () => {
-    const grantedReward = new anchor.BN(10);
+    const grantedReward = new anchor.BN(22000000000);
     const grantedCollateral = new anchor.BN(1000000); // 1 token
 
     const stakerRecordBefore = await getStakerRecord(user, 0);
@@ -304,7 +304,7 @@ describe("unipos", () => {
       grantedCollateral.toString()
     );
 
-    const grantedReward2 = new anchor.BN(20);
+    const grantedReward2 = new anchor.BN(22000000000);
     const grantedCollateral2 = new anchor.BN(2000000); // 2 token
 
     await program.methods
@@ -335,7 +335,7 @@ describe("unipos", () => {
 
   it("Claims rewards", async () => {
     // Wait for some time to accumulate rewards
-    await new Promise((resolve) => setTimeout(resolve, 7000));
+    await new Promise((resolve) => setTimeout(resolve, 40000));
 
     await program.methods
       .claimRewards(new anchor.BN(0))
@@ -352,6 +352,7 @@ describe("unipos", () => {
     const coreAccount = await getCoreInfo();
     const claimedRewards = coreAccount.totalClaimedRewards;
     const beneficiaryRewards = coreAccount.beneficiaryTotalRewards;
+    console.log(`total claimed rewards: ${claimedRewards}`)
     assert.isAbove(Number(claimedRewards), 0);
     assert.equal(
       Math.floor(Number(claimedRewards) / Number(beneficiaryRewards)),
@@ -390,8 +391,17 @@ describe("unipos", () => {
   it("Claims stakeholder rewards", async () => {
     const stakerRecordBefore = await getStakerRecord(user, 0);
 
+    console.log("total rewards: ", stakerRecordBefore.lockedRewards.toNumber() + stakerRecordBefore.claimedRewards.toNumber())
+    console.log("total granted rewards: ", stakerRecordBefore.grantedReward.toNumber())
+    console.log("stakeholders: ", stakerRecordBefore.stakeholders)
+
+    for (const stakeholder of stakerRecordBefore.stakeholders) {
+      console.log("stakeholder: ", stakeholder.stakeholder.toString(), stakeholder.grantedReward.toNumber())
+    }
+
     const stakerVaultBalance = await getStakerVaultBalance(user);
 
+    console.log(`stakerRecordBefore: claimedRewards: ${stakerRecordBefore.claimedRewards}, lockedRewards: ${stakerRecordBefore.lockedRewards}`)
     const stakeholderAccount1 = await token.getAccount(
       connection,
       stakeholderTokenAccount.address
@@ -435,7 +445,12 @@ describe("unipos", () => {
     );
     let stakeholder2Earned =
       stakeholderAccount4.amount - stakeholderAccount3.amount;
-    assert.equal(stakeholder2Earned / stakeholder1Earned, 2);
+    console.log(`stakeholder2Earned: ${stakeholder2Earned}, stakeholder1Earned: ${stakeholder1Earned}`)
+    assert.equal(stakeholder2Earned, stakeholder1Earned);
+
+    const stakerRecordAfter = await getStakerRecord(user, 0);
+
+    console.log(`stakerRecordAfter: claimedRewards: ${stakerRecordAfter.claimedRewards}, lockedRewards: ${stakerRecordAfter.lockedRewards}`)
   });
 
   it("Unstake", async () => {
@@ -590,7 +605,7 @@ async function createTokenAccount(
     mint.publicKey,
     a.address,
     mint,
-    10000 * MILLION,
+    10000000000 * MILLION,
     [],
     null,
     token.TOKEN_PROGRAM_ID

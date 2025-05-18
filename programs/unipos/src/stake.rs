@@ -105,7 +105,7 @@ pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
     core.total_claimed_rewards += to_be_claimed;
 
     // Calculate beneficiary share
-    let beneficiary_share = (to_be_claimed * (100 - core.user_reward_share)) / core.user_reward_share;
+    let beneficiary_share = ((to_be_claimed as u128 * (100 - core.user_reward_share) as u128) / core.user_reward_share as u128) as u64;
     core.beneficiary_total_rewards += beneficiary_share;
 
     let transfer_ctx = CpiContext::new(

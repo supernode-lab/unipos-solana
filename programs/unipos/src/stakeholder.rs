@@ -65,7 +65,7 @@ pub fn claim_stakeholder_reward(ctx: Context<StakeholderClaim>, number: u64) -> 
 	let stakeholder_info = &mut staker_record.stakeholders[num];
 
 	// Calculate claimable rewards
-	let claimable_total_reward = (stakeholder_info.granted_reward * claimed_rewards) / total_rewards;
+	let claimable_total_reward = ((stakeholder_info.granted_reward as u128 * claimed_rewards as u128) / total_rewards as u128) as u64;
 	require!(claimable_total_reward > stakeholder_info.claimed_reward, UniposError::NothingToClaim);
 
 	let claimable_reward = claimable_total_reward - stakeholder_info.claimed_reward;
