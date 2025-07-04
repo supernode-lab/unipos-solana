@@ -312,7 +312,7 @@ fn get_unlocked_installment_rewards(now: u64, staker_record: &StakerRecord, inst
     } else {
         (elapsed_time * installment_num) / staker_record.lock_period_secs
     };
-    (total_rewards / installment_num) * unlocked_phase
+    (total_rewards * unlocked_phase) / installment_num
 }
 
 #[cfg(test)]
