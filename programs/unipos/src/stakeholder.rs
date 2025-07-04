@@ -110,6 +110,8 @@ pub fn claim_stakeholder_collateral(ctx: Context<StakeholderClaim>, number: u64)
 	let num = num.ok_or(UniposError::StakeholderNotExists)?;
 	let stakeholder_info = &mut staker_record.stakeholders[num];
 
+	require!(stakeholder_info.claimed_collateral == 0, UniposError::NothingToClaim);
+
 	let amount = stakeholder_info.granted_collateral;
 	stakeholder_info.claimed_collateral = amount;
 

@@ -28,7 +28,7 @@ pub fn deposit_security(ctx: Context<DepositSecurity>, amount: u64) -> Result<()
     token::transfer(cpi_ctx, security)?;
 
     core.total_security_deposit += security;
-    core.allowed_collateral = collateral;
+    core.allowed_collateral += collateral;
 
     emit!(SecurityDepositedEvent {
             amount: security,

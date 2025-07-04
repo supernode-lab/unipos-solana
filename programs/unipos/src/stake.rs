@@ -304,15 +304,6 @@ fn calculate_user_rewards(amount: u128, apy_percentage: u128, lock_period_secs: 
     ((total_rewards * user_reward_share) / 100) as u64
 }
 
-impl Default for StakerRecord {
-    fn default() -> Self {
-        let mut r = StakerRecord::default();
-        r.stakeholders = Vec::with_capacity(MAX_STAKEHOLDERS as usize);
-        r.stakeholders.resize(MAX_STAKEHOLDERS as usize, Default::default());
-        r
-    }
-}
-
 fn get_unlocked_installment_rewards(now: u64, staker_record: &StakerRecord, installment_num: u64) -> u64 {
     let total_rewards = staker_record.claimed_rewards + staker_record.locked_rewards;
     let elapsed_time = now - staker_record.start_time;
