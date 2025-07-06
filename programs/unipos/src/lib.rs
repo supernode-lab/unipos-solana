@@ -32,6 +32,7 @@ pub mod unipos {
         core.provider = ctx.accounts.provider.key();
         core.mint = ctx.accounts.mint.key();
         core.lock_period_secs = lock_period;
+        require!(user_reward_share <= 100, UniposError::InvalidAmount);
         core.user_reward_share = user_reward_share;
         core.apy_percentage = apy;
         core.min_stake_amount = min_stake_amount;

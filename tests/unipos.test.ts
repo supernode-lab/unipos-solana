@@ -415,6 +415,7 @@ describe("unipos", () => {
       })
       .signers([stakeholder])
       .rpc();
+    console.log("claimed")
 
     const stakeholderAccount2 = await token.getAccount(
       connection,

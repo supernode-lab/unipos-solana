@@ -8,8 +8,9 @@ use crate::stakeholder::{StakeholderInfo, MAX_STAKEHOLDERS};
 pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
     require!(amount > 0, UniposError::InvalidAmount);
     require!(amount >= ctx.accounts.core.min_stake_amount, UniposError::AmountTooSmall);
+    let new_total = ctx.accounts.core.total_collateral.checked_add(amount).ok_or_else(|| UniposError::InsufficientAllowance)?;
     require!(
-        ctx.accounts.core.total_collateral + amount <= ctx.accounts.core.allowed_collateral,
+        new_total <= ctx.accounts.core.allowed_collateral,
         UniposError::InsufficientAllowance
     );
 
@@ -36,13 +37,13 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
         ctx.accounts.core.apy_percentage as u128,
         ctx.accounts.core.lock_period_secs as u128,
         ctx.accounts.core.user_reward_share as u128,
-    );
+    )?;
     staker_record.claimed_rewards = 0;
     staker_record.unstaked = 0;
 
     // Update stake core state
     let core = &mut ctx.accounts.core;
-    core.total_collateral += amount;
+    core.total_collateral = new_total;
 
     emit!(StakeEvent {
             user: ctx.accounts.user.key(),
@@ -58,15 +59,18 @@ pub fn unstake(ctx: Context<Unstake>, number: u64) -> Result<()> {
     let staker_record = &mut ctx.accounts.staker_record;
     require!(staker_record.staker == ctx.accounts.user.key(), UniposError::NotOwner);
 
+    let lock_end_time = staker_record.start_time.checked_add(staker_record.lock_period_secs)
+        .ok_or(UniposError::InvalidAmount)?;
     require!(
-        Clock::get()?.unix_timestamp as u64 >= staker_record.start_time + staker_record.lock_period_secs,
+        Clock::get()?.unix_timestamp as u64 >= lock_end_time,
         UniposError::LockPeriodNotEnded
     );
     require!(staker_record.unstaked == 0, UniposError::AlreadyClaimed);
 
     staker_record.unstaked = 1;
     let core = &mut ctx.accounts.core;
-    core.unstaked_collateral += staker_record.collateral;
+    core.unstaked_collateral = core.unstaked_collateral.checked_add(staker_record.collateral)
+        .ok_or(UniposError::InvalidAmount)?;
 
     // Transfer tokens back to user
     let transfer_ctx = CpiContext::new(
@@ -94,19 +98,28 @@ pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
         Clock::get().unwrap().unix_timestamp as u64,
         staker_record,
         ctx.accounts.core.installment_num,
-    );
+    )?;
     require!(staker_record.claimed_rewards < total_unlocked, UniposError::NothingToClaim);
 
-    let to_be_claimed = total_unlocked - staker_record.claimed_rewards;
-    staker_record.claimed_rewards += to_be_claimed;
-    staker_record.locked_rewards -= to_be_claimed;
+    let to_be_claimed = total_unlocked.checked_sub(staker_record.claimed_rewards)
+        .ok_or(UniposError::InvalidAmount)?;
+    staker_record.claimed_rewards = staker_record.claimed_rewards.checked_add(to_be_claimed)
+        .ok_or(UniposError::InvalidAmount)?;
+    staker_record.locked_rewards = staker_record.locked_rewards.checked_sub(to_be_claimed)
+        .ok_or(UniposError::InvalidAmount)?;
 
     let core = &mut ctx.accounts.core;
-    core.total_claimed_rewards += to_be_claimed;
+    core.total_claimed_rewards = core.total_claimed_rewards.checked_add(to_be_claimed)
+        .ok_or(UniposError::InvalidAmount)?;
 
     // Calculate beneficiary share
-    let beneficiary_share = ((to_be_claimed as u128 * (100 - core.user_reward_share) as u128) / core.user_reward_share as u128) as u64;
-    core.beneficiary_total_rewards += beneficiary_share;
+    let user_share = core.user_reward_share;
+    let beneficiary_share_numerator = to_be_claimed.checked_mul(100 - user_share)
+        .ok_or(UniposError::InvalidAmount)?;
+    let beneficiary_share = beneficiary_share_numerator.checked_div(user_share)
+        .ok_or(UniposError::InvalidAmount)?;
+    core.beneficiary_total_rewards = core.beneficiary_total_rewards.checked_add(beneficiary_share)
+        .ok_or(UniposError::InvalidAmount)?;
 
     let transfer_ctx = CpiContext::new(
         ctx.accounts.token_program.to_account_info(),
@@ -299,20 +312,40 @@ pub struct RewardsClaimedEvent {
     pub amount: u64,
 }
 
-fn calculate_user_rewards(amount: u128, apy_percentage: u128, lock_period_secs: u128, user_reward_share: u128) -> u64 {
-    let total_rewards = (amount * apy_percentage * lock_period_secs) / (100 * 365 * 86400);
-    ((total_rewards * user_reward_share) / 100) as u64
+fn calculate_user_rewards(amount: u128, apy_percentage: u128, lock_period_secs: u128, user_reward_share: u128) -> Result<u64> {
+    let total_rewards = amount.checked_mul(apy_percentage)
+        .ok_or(UniposError::InvalidAmount)?
+        .checked_mul(lock_period_secs)
+        .ok_or(UniposError::InvalidAmount)?
+        .checked_div(100u128.checked_mul(365)
+            .ok_or(UniposError::InvalidAmount)?
+            .checked_mul(86400)
+            .ok_or(UniposError::InvalidAmount)?)
+        .ok_or(UniposError::InvalidAmount)?;
+    let user_rewards = total_rewards.checked_mul(user_reward_share)
+        .ok_or(UniposError::InvalidAmount)?
+        .checked_div(100)
+        .ok_or(UniposError::InvalidAmount)?;
+    Ok(user_rewards as u64)
 }
 
-fn get_unlocked_installment_rewards(now: u64, staker_record: &StakerRecord, installment_num: u64) -> u64 {
-    let total_rewards = staker_record.claimed_rewards + staker_record.locked_rewards;
-    let elapsed_time = now - staker_record.start_time;
+fn get_unlocked_installment_rewards(now: u64, staker_record: &StakerRecord, installment_num: u64) -> Result<u64> {
+    let total_rewards = staker_record.claimed_rewards.checked_add(staker_record.locked_rewards)
+        .ok_or(UniposError::InvalidAmount)?;
+    let elapsed_time = now.checked_sub(staker_record.start_time)
+        .ok_or(UniposError::InvalidAmount)?;
     let unlocked_phase = if elapsed_time >= staker_record.lock_period_secs {
         installment_num
     } else {
-        (elapsed_time * installment_num) / staker_record.lock_period_secs
+        elapsed_time.checked_mul(installment_num)
+            .ok_or(UniposError::InvalidAmount)?
+            .checked_div(staker_record.lock_period_secs)
+            .ok_or(UniposError::InvalidAmount)?
     };
-    (total_rewards * unlocked_phase) / installment_num
+    Ok(total_rewards.checked_mul(unlocked_phase)
+        .ok_or(UniposError::InvalidAmount)?
+        .checked_div(installment_num)
+        .ok_or(UniposError::InvalidAmount)?)
 }
 
 #[cfg(test)]
@@ -325,7 +358,7 @@ mod test {
             (200_000_000_000, 160, 15552000, 100), // 160%, 180 days, 100% user share
         ];
         for case in cases {
-            let o = calculate_user_rewards(case.0, case.1, case.2, case.3);
+            let o = calculate_user_rewards(case.0, case.1, case.2, case.3).unwrap();
             assert!(o > 157_000_000_000);
             assert!(o < 158_000_000_000);
         }
@@ -348,7 +381,7 @@ mod test {
             stakeholders_cnt: 0,
         };
         let installment_num = 180;
-        let a = get_unlocked_installment_rewards(now, &staker_record, installment_num);
+        let a = get_unlocked_installment_rewards(now, &staker_record, installment_num).unwrap();
         assert_eq!(a, 1_744_444_444);
     }
 }

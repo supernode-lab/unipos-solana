@@ -24,11 +24,14 @@ pub fn claim_beneficiary_rewards(ctx: Context<ClaimBeneficiaryRewards>) -> Resul
 	let core = &mut ctx.accounts.core;
 	require!(core.beneficiary == ctx.accounts.beneficiary.key(), UniposError::NotBeneficiary);
 
-	let rewards = core.beneficiary_total_rewards - core.beneficiary_claimed_rewards;
+	let rewards = core.beneficiary_total_rewards.checked_sub(core.beneficiary_claimed_rewards)
+		.ok_or(UniposError::InvalidAmount)?;
 	require!(rewards > 0, UniposError::NothingToClaim);
 
-	core.beneficiary_claimed_rewards += rewards;
-	core.total_claimed_rewards += rewards;
+	core.beneficiary_claimed_rewards = core.beneficiary_claimed_rewards.checked_add(rewards)
+		.ok_or(UniposError::InvalidAmount)?;
+	core.total_claimed_rewards = core.total_claimed_rewards.checked_add(rewards)
+		.ok_or(UniposError::InvalidAmount)?;
 
 	// Transfer rewards to beneficiary
 	let transfer_ctx = CpiContext::new(

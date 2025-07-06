@@ -10,12 +10,19 @@ pub fn add_stakeholder(ctx: Context<AddStakeholder>, number: u64, granted_reward
 	let staker_record = &mut ctx.accounts.staker_record;
 
 	// Check if new grants exceed available amounts
+	let new_total_granted_reward = staker_record.granted_reward.checked_add(granted_reward)
+		.ok_or(UniposError::InvalidAmount)?;
+	let total_available_rewards = staker_record.locked_rewards.checked_add(staker_record.claimed_rewards)
+		.ok_or(UniposError::InvalidAmount)?;
 	require!(
-		staker_record.granted_reward + granted_reward <= staker_record.locked_rewards + staker_record.claimed_rewards,
+		new_total_granted_reward <= total_available_rewards,
 		UniposError::InsufficientAllowance
 	);
+	
+	let new_total_granted_collateral = staker_record.granted_collateral.checked_add(granted_collateral)
+		.ok_or(UniposError::InvalidAmount)?;
 	require!(
-		staker_record.granted_collateral + granted_collateral <= staker_record.collateral,
+		new_total_granted_collateral <= staker_record.collateral,
 		UniposError::InsufficientAllowance
 	);
 	require!(staker_record.stakeholders_cnt <= MAX_STAKEHOLDERS, UniposError::InsufficientAllowance);
@@ -31,9 +38,12 @@ pub fn add_stakeholder(ctx: Context<AddStakeholder>, number: u64, granted_reward
 		granted_collateral,
 		claimed_collateral: 0,
 	});
-	staker_record.stakeholders_cnt += 1;
-	staker_record.granted_collateral += granted_collateral;
-	staker_record.granted_reward += granted_reward;
+	staker_record.stakeholders_cnt = staker_record.stakeholders_cnt.checked_add(1)
+		.ok_or(UniposError::InvalidAmount)?;
+	staker_record.granted_collateral = staker_record.granted_collateral.checked_add(granted_collateral)
+		.ok_or(UniposError::InvalidAmount)?;
+	staker_record.granted_reward = staker_record.granted_reward.checked_add(granted_reward)
+		.ok_or(UniposError::InvalidAmount)?;
 
 	emit!(StakeholderAddedEvent {
 		staker: ctx.accounts.staker.key(),
@@ -49,8 +59,10 @@ pub fn claim_stakeholder_reward(ctx: Context<StakeholderClaim>, number: u64) -> 
 	let stakeholder_key = ctx.accounts.stakeholder.key();
 	let staker_record = &mut ctx.accounts.staker_record;
 
+	msg!("before calculate total_rewards");
 	let claimed_rewards = staker_record.claimed_rewards;
-	let total_rewards = claimed_rewards + staker_record.locked_rewards;
+	let total_rewards = claimed_rewards.checked_add(staker_record.locked_rewards)
+		.ok_or(UniposError::InvalidAmount)?;
 
 	// Find the stakeholder in the record
 	let mut num: Option<usize> = None;
@@ -64,11 +76,18 @@ pub fn claim_stakeholder_reward(ctx: Context<StakeholderClaim>, number: u64) -> 
 	let num = num.ok_or(UniposError::StakeholderNotExists)?;
 	let stakeholder_info = &mut staker_record.stakeholders[num];
 
+	msg!("before calculate claimable total reward");
 	// Calculate claimable rewards
-	let claimable_total_reward = ((stakeholder_info.granted_reward as u128 * claimed_rewards as u128) / total_rewards as u128) as u64;
+	let claimable_total_reward = (stakeholder_info.granted_reward as u128 * claimed_rewards as u128).checked_div(total_rewards as u128).ok_or(UniposError::InvalidAmount)? as u64;
+	// let claimable_total_reward = stakeholder_info.granted_reward.checked_mul(claimed_rewards)
+	// 	.ok_or(UniposError::InvalidAmount)?
+	// 	.checked_div(total_rewards)
+	// 	.ok_or(UniposError::InvalidAmount)?;
 	require!(claimable_total_reward > stakeholder_info.claimed_reward, UniposError::NothingToClaim);
 
-	let claimable_reward = claimable_total_reward - stakeholder_info.claimed_reward;
+	msg!("before calculate claimable_reward");
+	let claimable_reward = claimable_total_reward.checked_sub(stakeholder_info.claimed_reward)
+		.ok_or(UniposError::InvalidAmount)?;
 
 	// Update claimed rewards
 	stakeholder_info.claimed_reward = claimable_total_reward;

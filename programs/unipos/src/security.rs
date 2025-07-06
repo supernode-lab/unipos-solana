@@ -13,7 +13,7 @@ pub fn deposit_security(ctx: Context<DepositSecurity>, amount: u64) -> Result<()
         amount as u128,
         core.apy_percentage as u128,
         core.lock_period_secs as u128,
-    );
+    )?;
 
     // Transfer tokens from provider to core
     let cpi_accounts = Transfer {
@@ -27,8 +27,10 @@ pub fn deposit_security(ctx: Context<DepositSecurity>, amount: u64) -> Result<()
     );
     token::transfer(cpi_ctx, security)?;
 
-    core.total_security_deposit += security;
-    core.allowed_collateral += collateral;
+    core.total_security_deposit = core.total_security_deposit.checked_add(security)
+        .ok_or(UniposError::InvalidAmount)?;
+    core.allowed_collateral = core.allowed_collateral.checked_add(collateral)
+        .ok_or(UniposError::InvalidAmount)?;
 
     emit!(SecurityDepositedEvent {
             amount: security,
@@ -41,21 +43,24 @@ pub fn deposit_security(ctx: Context<DepositSecurity>, amount: u64) -> Result<()
 pub fn withdraw_security(ctx: Context<WithdrawSecurity>, amount: u64) -> Result<()> {
     let core = &mut ctx.accounts.core;
 
-    let remaining_collateral = core.allowed_collateral - core.total_collateral;
+    let remaining_collateral = core.allowed_collateral.checked_sub(core.total_collateral)
+        .ok_or(UniposError::InvalidAmount)?;
     let withdrawable_security = get_security_deposit_by_collateral(
         remaining_collateral as u128,
         core.apy_percentage as u128,
         core.lock_period_secs as u128,
-    );
+    )?;
     require!(withdrawable_security >= amount, UniposError::InsufficientSecurity);
 
     let (collateral, security) = get_collateral_by_security_deposit(
-        (core.total_security_deposit - amount) as u128,
+        (core.total_security_deposit.checked_sub(amount)
+            .ok_or(UniposError::InvalidAmount)?) as u128,
         core.apy_percentage as u128,
         core.lock_period_secs as u128,
-    );
+    )?;
     core.allowed_collateral = collateral;
-    let withdraw_amount = core.total_security_deposit - security;
+    let withdraw_amount = core.total_security_deposit.checked_sub(security)
+        .ok_or(UniposError::InvalidAmount)?;
     core.total_security_deposit = security;
 
     let total_security_deposit = core.total_security_deposit;
@@ -83,8 +88,23 @@ pub fn withdraw_security(ctx: Context<WithdrawSecurity>, amount: u64) -> Result<
 pub fn collect_from_pool(ctx: Context<CollectFromPool>) -> Result<()> {
     let core = &mut ctx.accounts.core;
     let vault = &mut ctx.accounts.core_vault;
-    require!(core.total_collateral + core.total_security_deposit < vault.amount + core.unstaked_collateral + core.total_claimed_rewards, UniposError::NoLockedToken);
-    let extra_token = vault.amount - (core.total_collateral + core.total_security_deposit - core.unstaked_collateral - core.total_claimed_rewards);
+    
+    let total_locked = core.total_collateral.checked_add(core.total_security_deposit)
+        .ok_or(UniposError::InvalidAmount)?;
+    let total_available = vault.amount.checked_add(core.unstaked_collateral)
+        .ok_or(UniposError::InvalidAmount)?
+        .checked_add(core.total_claimed_rewards)
+        .ok_or(UniposError::InvalidAmount)?;
+    
+    require!(total_locked < total_available, UniposError::NoLockedToken);
+    
+    let total_deducted = total_locked.checked_sub(core.unstaked_collateral)
+        .ok_or(UniposError::InvalidAmount)?
+        .checked_sub(core.total_claimed_rewards)
+        .ok_or(UniposError::InvalidAmount)?;
+    
+    let extra_token = vault.amount.checked_sub(total_deducted)
+        .ok_or(UniposError::InvalidAmount)?;
 
     // Transfer tokens back to provider
     let transfer_ctx = CpiContext::new(
@@ -203,23 +223,44 @@ pub struct CollectEvent {
 // collateral * apy * lock_days / 365 = security
 // lock_days = lock_secs / SECONDS_PER_DAY
 // so collateral = security * 365 * SECONDS_PER_DAY * 100 / (apy_percentage * lock_secs)
-fn get_collateral_by_security_deposit(security_deposit: u128, apy_percentage: u128, lock_secs: u128) -> (u64, u64) {
-    let numerator = security_deposit * 100 * 365 * SECONDS_PER_DAY;
-    let denominator = apy_percentage * lock_secs;
-    let collateral = numerator / denominator;
+fn get_collateral_by_security_deposit(security_deposit: u128, apy_percentage: u128, lock_secs: u128) -> Result<(u64, u64)> {
+    let numerator = security_deposit.checked_mul(100)
+        .ok_or(UniposError::InvalidAmount)?
+        .checked_mul(365)
+        .ok_or(UniposError::InvalidAmount)?
+        .checked_mul(SECONDS_PER_DAY)
+        .ok_or(UniposError::InvalidAmount)?;
+    let denominator = apy_percentage.checked_mul(lock_secs)
+        .ok_or(UniposError::InvalidAmount)?;
+    let collateral = numerator.checked_div(denominator)
+        .ok_or(UniposError::InvalidAmount)?;
     let mut security = security_deposit;
-    if numerator % denominator > 0 {
-        security = (collateral * denominator) / (100 * 365 * SECONDS_PER_DAY);
+    if numerator.checked_rem(denominator).unwrap_or(0) > 0 {
+        let adjusted_numerator = collateral.checked_mul(denominator)
+            .ok_or(UniposError::InvalidAmount)?;
+        let adjusted_denominator = 100u128.checked_mul(365)
+            .ok_or(UniposError::InvalidAmount)?
+            .checked_mul(SECONDS_PER_DAY)
+            .ok_or(UniposError::InvalidAmount)?;
+        security = adjusted_numerator.checked_div(adjusted_denominator)
+            .ok_or(UniposError::InvalidAmount)?;
     }
-    (collateral as u64, security as u64)
+    Ok((collateral as u64, security as u64))
 }
 
 // collateral * apy * lock_days / 365 = security
 // lock_days = lock_secs / SECONDS_PER_DAY
-fn get_security_deposit_by_collateral(collateral: u128, apy_percentage: u128, lock_secs: u128) -> u64 {
-    let numerator = collateral * apy_percentage * lock_secs;
-    let denominator = 365 * SECONDS_PER_DAY * 100;
-    (numerator / denominator) as u64
+fn get_security_deposit_by_collateral(collateral: u128, apy_percentage: u128, lock_secs: u128) -> Result<u64> {
+    let numerator = collateral.checked_mul(apy_percentage)
+        .ok_or(UniposError::InvalidAmount)?
+        .checked_mul(lock_secs)
+        .ok_or(UniposError::InvalidAmount)?;
+    let denominator = 365u128.checked_mul(SECONDS_PER_DAY)
+        .ok_or(UniposError::InvalidAmount)?
+        .checked_mul(100)
+        .ok_or(UniposError::InvalidAmount)?;
+    Ok((numerator.checked_div(denominator)
+        .ok_or(UniposError::InvalidAmount)?) as u64)
 }
 
 #[cfg(test)]
@@ -228,14 +269,14 @@ mod tests {
 
     #[test]
     fn test_get_collateral_by_security_deposit() {
-        let (collateral, security) = get_collateral_by_security_deposit(5000_000_000_000, 160, 15552000);
+        let (collateral, security) = get_collateral_by_security_deposit(5000_000_000_000, 160, 15552000).unwrap();
         assert_eq!(security, 4999_999_999_999);
         assert_eq!(collateral, 6336_805_555_555);
     }
 
     #[test]
     fn test_get_security_deposit_by_collateral() {
-        let security = get_security_deposit_by_collateral(6336_805_555_555, 160, 15552000);
+        let security = get_security_deposit_by_collateral(6336_805_555_555, 160, 15552000).unwrap();
         assert_eq!(security, 4999_999_999_999);
     }
 }
