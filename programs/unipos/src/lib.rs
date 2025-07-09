@@ -13,7 +13,7 @@ use role::*;
 use stakeholder::*;
 use security::*;
 
-declare_id!("E5BHurNhdpFtFFNJkWoFyPRCxyMvMMffZV84YGHyD8kq");
+declare_id!("EMCtRBUVw2gkD38LDkNE7g7u99pCm2oVUkvVuMMBtVFJ");
 
 #[program]
 pub mod unipos {
