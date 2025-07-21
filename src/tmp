@@ -1,0 +1,2 @@
+const PROGRAM_ID = new PublicKey("FbgntXBDCycTQZqGW39rx7FN1DrfgGqmbKJ5s2ABTZiG");
+const NEW_PROGRAM_ID = new PublicKey("5p6gFeVmwcD4vYUW7DfDVt1qk3JUbwZfvCRw5QdQEQ7q");

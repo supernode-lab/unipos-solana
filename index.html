@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Multi-Token Staking App</title>
+</head>
+<body>
+  <h3>选择质押的 Token</h3>
+  <select id="tokenSelect">
+    <option value="TOKEN_MINT_A">Token A</option>
+    <option value="TOKEN_MINT_B">Token B</option>
+  </select>
+
+  <button id="connectBtn">连接钱包</button>
+  <button id="initBtn">调用 init</button>
+  <button id="stakeBtn">调用 stake</button>
+  <button id="depositBtn">调用 deposit</button>
+  <pre id="log"></pre>
+
+  <script type="module" src="./src/script.js"></script>
+</body>
+</html>
