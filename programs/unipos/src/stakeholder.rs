@@ -79,10 +79,6 @@ pub fn claim_stakeholder_reward(ctx: Context<StakeholderClaim>, number: u64) -> 
 	msg!("before calculate claimable total reward");
 	// Calculate claimable rewards
 	let claimable_total_reward = (stakeholder_info.granted_reward as u128 * claimed_rewards as u128).checked_div(total_rewards as u128).ok_or(UniposError::InvalidAmount)? as u64;
-	// let claimable_total_reward = stakeholder_info.granted_reward.checked_mul(claimed_rewards)
-	// 	.ok_or(UniposError::InvalidAmount)?
-	// 	.checked_div(total_rewards)
-	// 	.ok_or(UniposError::InvalidAmount)?;
 	require!(claimable_total_reward > stakeholder_info.claimed_reward, UniposError::NothingToClaim);
 
 	msg!("before calculate claimable_reward");

@@ -57,7 +57,11 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
 
 pub fn unstake(ctx: Context<Unstake>, number: u64) -> Result<()> {
     let staker_record = &mut ctx.accounts.staker_record;
-    require!(staker_record.staker == ctx.accounts.user.key(), UniposError::NotOwner);
+    let user_key = ctx.accounts.user.key();
+    if staker_record.staker != user_key {
+        let is_stakeholder = staker_record.stakeholders.iter().find(|x| x.stakeholder == user_key);
+        require!(is_stakeholder.is_some(), UniposError::NotStakeholder);
+    }
 
     let lock_end_time = staker_record.start_time.checked_add(staker_record.lock_period_secs)
         .ok_or(UniposError::InvalidAmount)?;
