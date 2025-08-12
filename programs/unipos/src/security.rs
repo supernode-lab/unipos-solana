@@ -220,13 +220,13 @@ pub struct CollectEvent {
     pub amount: u64,
 }
 
-// collateral * apy * lock_days / 365 = security
+// collateral * apy * lock_days / 360 = security
 // lock_days = lock_secs / SECONDS_PER_DAY
-// so collateral = security * 365 * SECONDS_PER_DAY * 100 / (apy_percentage * lock_secs)
+// so collateral = security * 360 * SECONDS_PER_DAY * 100 / (apy_percentage * lock_secs)
 fn get_collateral_by_security_deposit(security_deposit: u128, apy_percentage: u128, lock_secs: u128) -> Result<(u64, u64)> {
     let numerator = security_deposit.checked_mul(100)
         .ok_or(UniposError::InvalidAmount)?
-        .checked_mul(365)
+        .checked_mul(360)
         .ok_or(UniposError::InvalidAmount)?
         .checked_mul(SECONDS_PER_DAY)
         .ok_or(UniposError::InvalidAmount)?;
@@ -238,7 +238,7 @@ fn get_collateral_by_security_deposit(security_deposit: u128, apy_percentage: u1
     if numerator.checked_rem(denominator).unwrap_or(0) > 0 {
         let adjusted_numerator = collateral.checked_mul(denominator)
             .ok_or(UniposError::InvalidAmount)?;
-        let adjusted_denominator = 100u128.checked_mul(365)
+        let adjusted_denominator = 100u128.checked_mul(360)
             .ok_or(UniposError::InvalidAmount)?
             .checked_mul(SECONDS_PER_DAY)
             .ok_or(UniposError::InvalidAmount)?;
@@ -248,14 +248,14 @@ fn get_collateral_by_security_deposit(security_deposit: u128, apy_percentage: u1
     Ok((collateral as u64, security as u64))
 }
 
-// collateral * apy * lock_days / 365 = security
+// collateral * apy * lock_days / 360 = security
 // lock_days = lock_secs / SECONDS_PER_DAY
 fn get_security_deposit_by_collateral(collateral: u128, apy_percentage: u128, lock_secs: u128) -> Result<u64> {
     let numerator = collateral.checked_mul(apy_percentage)
         .ok_or(UniposError::InvalidAmount)?
         .checked_mul(lock_secs)
         .ok_or(UniposError::InvalidAmount)?;
-    let denominator = 365u128.checked_mul(SECONDS_PER_DAY)
+    let denominator = 360u128.checked_mul(SECONDS_PER_DAY)
         .ok_or(UniposError::InvalidAmount)?
         .checked_mul(100)
         .ok_or(UniposError::InvalidAmount)?;

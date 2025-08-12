@@ -321,7 +321,7 @@ fn calculate_user_rewards(amount: u128, apy_percentage: u128, lock_period_secs: 
         .ok_or(UniposError::InvalidAmount)?
         .checked_mul(lock_period_secs)
         .ok_or(UniposError::InvalidAmount)?
-        .checked_div(100u128.checked_mul(365)
+        .checked_div(100u128.checked_mul(360)
             .ok_or(UniposError::InvalidAmount)?
             .checked_mul(86400)
             .ok_or(UniposError::InvalidAmount)?)
