@@ -3,16 +3,11 @@ use anchor_lang::prelude::{Account, AccountInfo, Context, Program, Signer, Syste
 use anchor_spl::associated_token::AssociatedToken;
 use crate::{Core, UniposError};
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
-use crate::stakeholder::{StakeholderInfo, MAX_STAKEHOLDERS};
 
 pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
     require!(amount > 0, UniposError::InvalidAmount);
     require!(amount >= ctx.accounts.core.min_stake_amount, UniposError::AmountTooSmall);
     let new_total = ctx.accounts.core.total_collateral.checked_add(amount).ok_or_else(|| UniposError::InsufficientAllowance)?;
-    require!(
-        new_total <= ctx.accounts.core.allowed_collateral,
-        UniposError::InsufficientAllowance
-    );
 
     // Transfer tokens from user to core
     let cpi_accounts = Transfer {
@@ -29,17 +24,12 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
     // Create new stake record
     let staker_record = &mut ctx.accounts.staker_record;
     staker_record.staker = ctx.accounts.staker.key();
-    staker_record.collateral = amount;
     staker_record.start_time = Clock::get()?.unix_timestamp as u64;
     staker_record.lock_period_secs = ctx.accounts.core.lock_period_secs;
-    staker_record.locked_rewards = calculate_user_rewards(
-        amount as u128,
-        ctx.accounts.core.apy_percentage as u128,
-        ctx.accounts.core.lock_period_secs as u128,
-        ctx.accounts.core.user_reward_share as u128,
-    )?;
+    staker_record.locked_rewards = amount;
     staker_record.claimed_rewards = 0;
     staker_record.unstaked = 0;
+    staker_record.number = number;
 
     // Update stake core state
     let core = &mut ctx.accounts.core;
@@ -58,39 +48,16 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
 pub fn unstake(ctx: Context<Unstake>, number: u64) -> Result<()> {
     let staker_record = &mut ctx.accounts.staker_record;
     let user_key = ctx.accounts.user.key();
-    if staker_record.staker != user_key {
-        let is_stakeholder = staker_record.stakeholders.iter().find(|x| x.stakeholder == user_key);
-        require!(is_stakeholder.is_some(), UniposError::NotStakeholder);
-    }
+    require!(staker_record.staker == user_key, UniposError::NotOwner);
 
-    let lock_end_time = staker_record.start_time.checked_add(staker_record.lock_period_secs)
-        .ok_or(UniposError::InvalidAmount)?;
-    require!(
-        Clock::get()?.unix_timestamp as u64 >= lock_end_time,
-        UniposError::LockPeriodNotEnded
-    );
-    require!(staker_record.unstaked == 0, UniposError::AlreadyClaimed);
+    require!(Clock::get()?.unix_timestamp as u64 >= staker_record.start_time + staker_record.lock_period_secs, UniposError::LockPeriodNotEnded);
 
+    require!(staker_record.unstaked == 1, UniposError::AlreadyClaimed);
     staker_record.unstaked = 1;
-    let core = &mut ctx.accounts.core;
-    core.unstaked_collateral = core.unstaked_collateral.checked_add(staker_record.collateral)
-        .ok_or(UniposError::InvalidAmount)?;
-
-    // Transfer tokens back to user
-    let transfer_ctx = CpiContext::new(
-        ctx.accounts.token_program.to_account_info(),
-        Transfer {
-            from: ctx.accounts.core_vault.to_account_info(),
-            to: ctx.accounts.staker_vault.to_account_info(),
-            authority: ctx.accounts.core.to_account_info(),
-        }
-    );
-    let pda_sign: &[&[u8]] = &[b"core", &[ctx.bumps.core]];
-    token::transfer(transfer_ctx.with_signer(&[pda_sign]), staker_record.collateral)?;
 
     emit!(UnstakeEvent {
             user: ctx.accounts.user.key(),
-            amount: staker_record.collateral,
+            amount: staker_record.claimed_rewards,
         });
 
     Ok(())
@@ -116,15 +83,6 @@ pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
     core.total_claimed_rewards = core.total_claimed_rewards.checked_add(to_be_claimed)
         .ok_or(UniposError::InvalidAmount)?;
 
-    // Calculate beneficiary share
-    let user_share = core.user_reward_share;
-    let beneficiary_share_numerator = to_be_claimed.checked_mul(100 - user_share)
-        .ok_or(UniposError::InvalidAmount)?;
-    let beneficiary_share = beneficiary_share_numerator.checked_div(user_share)
-        .ok_or(UniposError::InvalidAmount)?;
-    core.beneficiary_total_rewards = core.beneficiary_total_rewards.checked_add(beneficiary_share)
-        .ok_or(UniposError::InvalidAmount)?;
-
     let transfer_ctx = CpiContext::new(
         ctx.accounts.token_program.to_account_info(),
         Transfer {
@@ -135,7 +93,6 @@ pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
     );
     let pda_sign: &[&[u8]] = &[b"core", &[ctx.bumps.core]];
     token::transfer(transfer_ctx.with_signer(&[pda_sign]), to_be_claimed)?;
-
 
     emit!(RewardsClaimedEvent {
             user: ctx.accounts.user.key(),
@@ -283,17 +240,12 @@ pub struct ClaimRewards<'info> {
 #[account]
 pub struct StakerRecord {
     pub staker: Pubkey,
-    pub collateral: u64,
     pub start_time: u64,
     pub lock_period_secs: u64,
     pub locked_rewards: u64,
     pub claimed_rewards: u64,
     pub unstaked: u8,
-
-    pub granted_reward: u64,
-    pub granted_collateral: u64,
-    pub stakeholders: Vec<StakeholderInfo>,
-    pub stakeholders_cnt: u8,
+    pub number: u64,
 }
 
 #[event]
@@ -373,16 +325,12 @@ mod test {
         let now = 86400 * 3;
         let staker_record = StakerRecord {
             staker: Default::default(),
-            collateral: 200000000000,
             start_time: 86400,
             lock_period_secs: 15552000,
             locked_rewards: 157_000_000_000,
             claimed_rewards: 0,
             unstaked: 0,
-            granted_reward: 0,
-            granted_collateral: 0,
-            stakeholders: vec![],
-            stakeholders_cnt: 0,
+            number: 0,
         };
         let installment_num = 180;
         let a = get_unlocked_installment_rewards(now, &staker_record, installment_num).unwrap();
