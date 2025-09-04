@@ -47,6 +47,7 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
 pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
     let staker_record = &mut ctx.accounts.staker_record;
     require!(staker_record.staker == ctx.accounts.staker.key(), UniposError::InvalidAddress);
+    require!(staker_record.staker == ctx.accounts.user.key(), UniposError::InvalidAddress);
     let total_unlocked = get_unlocked_installment_rewards(
         Clock::get().unwrap().unix_timestamp as u64,
         staker_record,
