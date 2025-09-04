@@ -6,12 +6,10 @@ use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 mod stake;
 mod role;
 mod stakeholder;
-mod security;
 
 use stake::*;
 use role::*;
 use stakeholder::*;
-use security::*;
 
 declare_id!("4FFs789SLFzoYK46z4eShQ1ACZJ4xuEJrKRY3Jpa5Fz7");
 
@@ -23,34 +21,21 @@ pub mod unipos {
         ctx: Context<Initialize>,
         lock_period: u64,
         user_reward_share: u64,
-        apy: u64,
         min_stake_amount: u64,
         installment_num: u64,
     ) -> Result<()> {
         let core = &mut ctx.accounts.core;
         core.admin = ctx.accounts.admin.key();
-        core.provider = ctx.accounts.provider.key();
         core.mint = ctx.accounts.mint.key();
         core.lock_period_secs = lock_period;
         require!(user_reward_share <= 100, UniposError::InvalidAmount);
         core.user_reward_share = user_reward_share;
-        core.apy_percentage = apy;
         core.min_stake_amount = min_stake_amount;
         core.installment_num = installment_num;
         core.total_collateral = 0;
         core.unstaked_collateral = 0;
         core.total_claimed_rewards = 0;
-        core.total_security_deposit = 0;
-        core.allowed_collateral = 0;
         Ok(())
-    }
-
-    pub fn transfer_provider_ownership(ctx: Context<TransferProviderOwnership>) -> Result<()> {
-        role::transfer_provider_ownership(ctx)
-    }
-
-    pub fn accept_provider_ownership(ctx: Context<AcceptProviderOwnership>) -> Result<()> {
-        role::accept_provider_ownership(ctx)
     }
 
     pub fn init_beneficiary(ctx: Context<InitBeneficiary>) -> Result<()> {
@@ -63,10 +48,6 @@ pub mod unipos {
 
     pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
         stake::stake(ctx, number, amount)
-    }
-
-    pub fn unstake(ctx: Context<Unstake>, number: u64) -> Result<()> {
-        stake::unstake(ctx, number)
     }
 
     pub fn add_stakeholder(ctx: Context<AddStakeholder>, number: u64, granted_reward: u64, granted_collateral: u64) -> Result<()> {
@@ -83,18 +64,6 @@ pub mod unipos {
 
     pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
         stake::claim_rewards(ctx, number)
-    }
-
-    pub fn deposit_security(ctx: Context<DepositSecurity>, amount: u64) -> Result<()> {
-        security::deposit_security(ctx, amount)
-    }
-
-    pub fn withdraw_security(ctx: Context<WithdrawSecurity>, amount: u64) -> Result<()> {
-        security::withdraw_security(ctx, amount)
-    }
-
-    pub fn collect_from_pool(ctx: Context<CollectFromPool>) -> Result<()> {
-        security::collect_from_pool(ctx)
     }
 }
 

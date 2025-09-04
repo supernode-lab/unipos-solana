@@ -54,28 +54,6 @@ pub fn claim_beneficiary_rewards(ctx: Context<ClaimBeneficiaryRewards>) -> Resul
 	Ok(())
 }
 
-pub fn transfer_provider_ownership(ctx: Context<TransferProviderOwnership>) -> Result<()> {
-	let core = &mut ctx.accounts.core;
-	core.pending_provider = ctx.accounts.new_provider.key();
-	emit!(OwnershipTransferredEvent{
-		old: core.provider.key(),
-		new: core.pending_provider.key(),
-	});
-	Ok(())
-}
-
-pub fn accept_provider_ownership(ctx: Context<AcceptProviderOwnership>) -> Result<()> {
-	let core = &mut ctx.accounts.core;
-	let old = core.provider;
-	core.provider = core.pending_provider;
-	core.pending_provider = Pubkey::default();
-	emit!(OwnershipTransferAcceptedEvent{
-		old,
-		new: core.provider.key(),
-	});
-	Ok(())
-}
-
 #[derive(Accounts)]
 pub struct InitBeneficiary<'info> {
     #[account(
@@ -111,35 +89,6 @@ pub struct ClaimBeneficiaryRewards<'info> {
     pub token_program: Program<'info, Token>,
 }
 
-#[derive(Accounts)]
-pub struct TransferProviderOwnership<'info> {
-	#[account(
-        mut,
-        seeds = [b"core"],
-        bump,
-		has_one = provider,
-	)]
-	pub core: Account<'info, Core>,
-
-	/// CHECK: no need
-	pub new_provider: AccountInfo<'info>,
-
-	pub provider: Signer<'info>,
-}
-
-#[derive(Accounts)]
-pub struct AcceptProviderOwnership<'info> {
-	#[account(
-        mut,
-        seeds = [b"core"],
-        bump,
-		has_one = pending_provider
-	)]
-	pub core: Account<'info, Core>,
-
-	pub pending_provider: Signer<'info>,
-}
-
 #[event]
 pub struct BeneficiaryInitializedEvent {
     pub beneficiary: Pubkey,
@@ -149,16 +98,4 @@ pub struct BeneficiaryInitializedEvent {
 pub struct BeneficiaryRewardsClaimedEvent {
     pub beneficiary: Pubkey,
     pub amount: u64,
-}
-
-#[event]
-pub struct OwnershipTransferredEvent {
-	pub old: Pubkey,
-	pub new: Pubkey,
-}
-
-#[event]
-pub struct OwnershipTransferAcceptedEvent {
-	pub old: Pubkey,
-	pub new: Pubkey,
 }

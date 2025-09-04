@@ -32,14 +32,10 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
     staker_record.collateral = amount;
     staker_record.start_time = Clock::get()?.unix_timestamp as u64;
     staker_record.lock_period_secs = ctx.accounts.core.lock_period_secs;
-    staker_record.locked_rewards = calculate_user_rewards(
-        amount as u128,
-        ctx.accounts.core.apy_percentage as u128,
-        ctx.accounts.core.lock_period_secs as u128,
-        ctx.accounts.core.user_reward_share as u128,
-    )?;
+    staker_record.locked_rewards = amount;
     staker_record.claimed_rewards = 0;
     staker_record.unstaked = 0;
+    staker_record.number = number;
 
     // Update stake core state
     let core = &mut ctx.accounts.core;
@@ -50,47 +46,6 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
             amount,
             start_time: Clock::get()?.unix_timestamp as u64,
             lock_days: ctx.accounts.core.lock_period_secs,
-        });
-
-    Ok(())
-}
-
-pub fn unstake(ctx: Context<Unstake>, number: u64) -> Result<()> {
-    let staker_record = &mut ctx.accounts.staker_record;
-    let user_key = ctx.accounts.user.key();
-    if staker_record.staker != user_key {
-        let is_stakeholder = staker_record.stakeholders.iter().find(|x| x.stakeholder == user_key);
-        require!(is_stakeholder.is_some(), UniposError::NotStakeholder);
-    }
-
-    let lock_end_time = staker_record.start_time.checked_add(staker_record.lock_period_secs)
-        .ok_or(UniposError::InvalidAmount)?;
-    require!(
-        Clock::get()?.unix_timestamp as u64 >= lock_end_time,
-        UniposError::LockPeriodNotEnded
-    );
-    require!(staker_record.unstaked == 0, UniposError::AlreadyClaimed);
-
-    staker_record.unstaked = 1;
-    let core = &mut ctx.accounts.core;
-    core.unstaked_collateral = core.unstaked_collateral.checked_add(staker_record.collateral)
-        .ok_or(UniposError::InvalidAmount)?;
-
-    // Transfer tokens back to user
-    let transfer_ctx = CpiContext::new(
-        ctx.accounts.token_program.to_account_info(),
-        Transfer {
-            from: ctx.accounts.core_vault.to_account_info(),
-            to: ctx.accounts.staker_vault.to_account_info(),
-            authority: ctx.accounts.core.to_account_info(),
-        }
-    );
-    let pda_sign: &[&[u8]] = &[b"core", &[ctx.bumps.core]];
-    token::transfer(transfer_ctx.with_signer(&[pda_sign]), staker_record.collateral)?;
-
-    emit!(UnstakeEvent {
-            user: ctx.accounts.user.key(),
-            amount: staker_record.collateral,
         });
 
     Ok(())
@@ -199,48 +154,6 @@ pub struct Stake<'info> {
 
 #[derive(Accounts)]
 #[instruction(number: u64)]
-pub struct Unstake<'info> {
-    #[account(
-        mut,
-        seeds = [b"core"],
-        bump
-    )]
-    pub core: Account<'info, Core>,
-
-    #[account(
-        mut,
-        seeds = [b"core_vault"],
-        bump
-    )]
-    pub core_vault: Account<'info, TokenAccount>,
-
-    /// CHECK: no need
-    pub staker: AccountInfo<'info>,
-
-    #[account(
-        mut,
-        seeds = [b"staker_record", staker.key().as_ref(), number.to_le_bytes().as_ref()],
-        bump
-    )]
-    pub staker_record: Account<'info, StakerRecord>,
-
-    #[account(
-        mut,
-        seeds = [b"staker_vault", staker.key().as_ref()],
-        bump,
-    )]
-    pub staker_vault: Account<'info, TokenAccount>,
-
-    #[account(mut)]
-    pub user: Signer<'info>,
-
-    pub token_program: Program<'info, Token>,
-    pub associated_token_program: Program<'info, AssociatedToken>,
-}
-
-
-#[derive(Accounts)]
-#[instruction(number: u64)]
 pub struct ClaimRewards<'info> {
     #[account(
         mut,
@@ -289,6 +202,7 @@ pub struct StakerRecord {
     pub locked_rewards: u64,
     pub claimed_rewards: u64,
     pub unstaked: u8,
+    pub number: u64,
 
     pub granted_reward: u64,
     pub granted_collateral: u64,
@@ -316,23 +230,6 @@ pub struct RewardsClaimedEvent {
     pub amount: u64,
 }
 
-fn calculate_user_rewards(amount: u128, apy_percentage: u128, lock_period_secs: u128, user_reward_share: u128) -> Result<u64> {
-    let total_rewards = amount.checked_mul(apy_percentage)
-        .ok_or(UniposError::InvalidAmount)?
-        .checked_mul(lock_period_secs)
-        .ok_or(UniposError::InvalidAmount)?
-        .checked_div(100u128.checked_mul(360)
-            .ok_or(UniposError::InvalidAmount)?
-            .checked_mul(86400)
-            .ok_or(UniposError::InvalidAmount)?)
-        .ok_or(UniposError::InvalidAmount)?;
-    let user_rewards = total_rewards.checked_mul(user_reward_share)
-        .ok_or(UniposError::InvalidAmount)?
-        .checked_div(100)
-        .ok_or(UniposError::InvalidAmount)?;
-    Ok(user_rewards as u64)
-}
-
 fn get_unlocked_installment_rewards(now: u64, staker_record: &StakerRecord, installment_num: u64) -> Result<u64> {
     let total_rewards = staker_record.claimed_rewards.checked_add(staker_record.locked_rewards)
         .ok_or(UniposError::InvalidAmount)?;
@@ -354,19 +251,7 @@ fn get_unlocked_installment_rewards(now: u64, staker_record: &StakerRecord, inst
 
 #[cfg(test)]
 mod test {
-    use crate::stake::{calculate_user_rewards, get_unlocked_installment_rewards, StakerRecord};
-
-    #[test]
-    fn test_calculate_user_rewards() {
-        let cases = vec![
-            (200_000_000_000, 160, 15552000, 100), // 160%, 180 days, 100% user share
-        ];
-        for case in cases {
-            let o = calculate_user_rewards(case.0, case.1, case.2, case.3).unwrap();
-            assert!(o > 157_000_000_000);
-            assert!(o < 158_000_000_000);
-        }
-    }
+    use crate::stake::{get_unlocked_installment_rewards, StakerRecord};
 
     #[test]
     fn test_get_unlocked_installment_rewards() {
@@ -379,6 +264,7 @@ mod test {
             locked_rewards: 157_000_000_000,
             claimed_rewards: 0,
             unstaked: 0,
+            number: 0,
             granted_reward: 0,
             granted_collateral: 0,
             stakeholders: vec![],
