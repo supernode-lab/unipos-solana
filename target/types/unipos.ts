@@ -374,9 +374,6 @@ export type Unipos = {
           "writable": true
         },
         {
-          "name": "claimTokenAccount"
-        },
-        {
           "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },

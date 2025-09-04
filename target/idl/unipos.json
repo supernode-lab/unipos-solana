@@ -368,9 +368,6 @@
           "writable": true
         },
         {
-          "name": "claim_token_account"
-        },
-        {
           "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },

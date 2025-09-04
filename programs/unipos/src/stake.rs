@@ -30,7 +30,6 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
     staker_record.claimed_rewards = 0;
     staker_record.unstaked = 0;
     staker_record.number = number;
-    staker_record.claim_token_account = ctx.accounts.claim_token_account.key();
     // Update stake core state
     let core = &mut ctx.accounts.core;
     core.total_collateral = new_total;
@@ -48,7 +47,6 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
 pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
     let staker_record = &mut ctx.accounts.staker_record;
     require!(staker_record.staker == ctx.accounts.staker.key(), UniposError::InvalidAddress);
-    require!(staker_record.claim_token_account == ctx.accounts.claim_token_account.key(), UniposError::InvalidAddress);
     let total_unlocked = get_unlocked_installment_rewards(
         Clock::get().unwrap().unix_timestamp as u64,
         staker_record,
@@ -132,9 +130,6 @@ pub struct Stake<'info> {
 
     #[account(mut)]
     pub user_token_account: Box<Account<'info, TokenAccount>>,
-
-    /// CHECK: no need
-    pub claim_token_account: Account<'info, TokenAccount>,
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
