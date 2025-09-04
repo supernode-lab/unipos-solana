@@ -34,11 +34,6 @@ pub mod unipos {
     pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
         stake::stake(ctx, number, amount)
     }
-
-    pub fn unstake(ctx: Context<Unstake>, number: u64) -> Result<()> {
-        stake::unstake(ctx, number)
-    }
-
     pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
         stake::claim_rewards(ctx, number)
     }

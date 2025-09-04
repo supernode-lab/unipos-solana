@@ -133,6 +133,10 @@ export type Unipos = {
           }
         },
         {
+          "name": "claimTokenAccount",
+          "writable": true
+        },
+        {
           "name": "user",
           "writable": true,
           "signer": true
@@ -370,6 +374,9 @@ export type Unipos = {
           "writable": true
         },
         {
+          "name": "claimTokenAccount"
+        },
+        {
           "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
@@ -389,146 +396,6 @@ export type Unipos = {
         },
         {
           "name": "amount",
-          "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "unstake",
-      "discriminator": [
-        90,
-        95,
-        107,
-        42,
-        205,
-        124,
-        50,
-        225
-      ],
-      "accounts": [
-        {
-          "name": "core",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  99,
-                  111,
-                  114,
-                  101
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "coreVault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  99,
-                  111,
-                  114,
-                  101,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "staker"
-        },
-        {
-          "name": "stakerRecord",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  115,
-                  116,
-                  97,
-                  107,
-                  101,
-                  114,
-                  95,
-                  114,
-                  101,
-                  99,
-                  111,
-                  114,
-                  100
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "staker"
-              },
-              {
-                "kind": "arg",
-                "path": "number"
-              }
-            ]
-          }
-        },
-        {
-          "name": "stakerVault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  115,
-                  116,
-                  97,
-                  107,
-                  101,
-                  114,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "staker"
-              }
-            ]
-          }
-        },
-        {
-          "name": "user",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-        },
-        {
-          "name": "associatedTokenProgram",
-          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-        }
-      ],
-      "args": [
-        {
-          "name": "number",
           "type": "u64"
         }
       ]
@@ -587,19 +454,6 @@ export type Unipos = {
         33,
         75,
         175
-      ]
-    },
-    {
-      "name": "unstakeEvent",
-      "discriminator": [
-        162,
-        104,
-        137,
-        228,
-        81,
-        3,
-        79,
-        197
       ]
     }
   ],
@@ -818,22 +672,10 @@ export type Unipos = {
           {
             "name": "number",
             "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "unstakeEvent",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "user",
-            "type": "pubkey"
           },
           {
-            "name": "amount",
-            "type": "u64"
+            "name": "claimTokenAccount",
+            "type": "pubkey"
           }
         ]
       }

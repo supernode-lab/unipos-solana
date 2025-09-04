@@ -30,7 +30,7 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
     staker_record.claimed_rewards = 0;
     staker_record.unstaked = 0;
     staker_record.number = number;
-
+    staker_record.claim_token_account = ctx.accounts.claim_token_account.key();
     // Update stake core state
     let core = &mut ctx.accounts.core;
     core.total_collateral = new_total;
@@ -45,26 +45,9 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
     Ok(())
 }
 
-pub fn unstake(ctx: Context<Unstake>, number: u64) -> Result<()> {
-    let staker_record = &mut ctx.accounts.staker_record;
-    let user_key = ctx.accounts.user.key();
-    require!(staker_record.staker == user_key, UniposError::NotOwner);
-
-    require!(Clock::get()?.unix_timestamp as u64 >= staker_record.start_time + staker_record.lock_period_secs, UniposError::LockPeriodNotEnded);
-
-    require!(staker_record.unstaked == 1, UniposError::AlreadyClaimed);
-    staker_record.unstaked = 1;
-
-    emit!(UnstakeEvent {
-            user: ctx.accounts.user.key(),
-            amount: staker_record.claimed_rewards,
-        });
-
-    Ok(())
-}
-
 pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
     let staker_record = &mut ctx.accounts.staker_record;
+    require!(staker_record.claim_token_account == ctx.accounts.claim_token_account.key(), UniposError::InvalidAddress);
     let total_unlocked = get_unlocked_installment_rewards(
         Clock::get().unwrap().unix_timestamp as u64,
         staker_record,
@@ -87,7 +70,7 @@ pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
         ctx.accounts.token_program.to_account_info(),
         Transfer {
             from: ctx.accounts.core_vault.to_account_info(),
-            to: ctx.accounts.staker_vault.to_account_info(),
+            to: ctx.accounts.claim_token_account.to_account_info(),
             authority: ctx.accounts.core.to_account_info(),
         }
     );
@@ -149,52 +132,13 @@ pub struct Stake<'info> {
     #[account(mut)]
     pub user_token_account: Box<Account<'info, TokenAccount>>,
 
+    /// CHECK: no need
+    pub claim_token_account: Account<'info, TokenAccount>,
+
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
     pub associated_token_program: Program<'info, AssociatedToken>,
 }
-
-#[derive(Accounts)]
-#[instruction(number: u64)]
-pub struct Unstake<'info> {
-    #[account(
-        mut,
-        seeds = [b"core"],
-        bump
-    )]
-    pub core: Account<'info, Core>,
-
-    #[account(
-        mut,
-        seeds = [b"core_vault"],
-        bump
-    )]
-    pub core_vault: Account<'info, TokenAccount>,
-
-    /// CHECK: no need
-    pub staker: AccountInfo<'info>,
-
-    #[account(
-        mut,
-        seeds = [b"staker_record", staker.key().as_ref(), number.to_le_bytes().as_ref()],
-        bump
-    )]
-    pub staker_record: Account<'info, StakerRecord>,
-
-    #[account(
-        mut,
-        seeds = [b"staker_vault", staker.key().as_ref()],
-        bump,
-    )]
-    pub staker_vault: Account<'info, TokenAccount>,
-
-    #[account(mut)]
-    pub user: Signer<'info>,
-
-    pub token_program: Program<'info, Token>,
-    pub associated_token_program: Program<'info, AssociatedToken>,
-}
-
 
 #[derive(Accounts)]
 #[instruction(number: u64)]
@@ -231,6 +175,9 @@ pub struct ClaimRewards<'info> {
     pub staker_vault: Account<'info, TokenAccount>,
 
     #[account(mut)]
+    pub claim_token_account: Account<'info, TokenAccount>,
+
+    #[account(mut)]
     pub user: Signer<'info>,
 
     pub token_program: Program<'info, Token>,
@@ -246,6 +193,7 @@ pub struct StakerRecord {
     pub claimed_rewards: u64,
     pub unstaked: u8,
     pub number: u64,
+    pub claim_token_account: Pubkey,
 }
 
 #[event]
@@ -257,34 +205,10 @@ pub struct StakeEvent {
 }
 
 #[event]
-pub struct UnstakeEvent {
-    pub user: Pubkey,
-    pub amount: u64,
-}
-
-#[event]
 pub struct RewardsClaimedEvent {
     pub user: Pubkey,
     pub amount: u64,
 }
-
-fn calculate_user_rewards(amount: u128, apy_percentage: u128, lock_period_secs: u128, user_reward_share: u128) -> Result<u64> {
-    let total_rewards = amount.checked_mul(apy_percentage)
-        .ok_or(UniposError::InvalidAmount)?
-        .checked_mul(lock_period_secs)
-        .ok_or(UniposError::InvalidAmount)?
-        .checked_div(100u128.checked_mul(360)
-            .ok_or(UniposError::InvalidAmount)?
-            .checked_mul(86400)
-            .ok_or(UniposError::InvalidAmount)?)
-        .ok_or(UniposError::InvalidAmount)?;
-    let user_rewards = total_rewards.checked_mul(user_reward_share)
-        .ok_or(UniposError::InvalidAmount)?
-        .checked_div(100)
-        .ok_or(UniposError::InvalidAmount)?;
-    Ok(user_rewards as u64)
-}
-
 fn get_unlocked_installment_rewards(now: u64, staker_record: &StakerRecord, installment_num: u64) -> Result<u64> {
     let total_rewards = staker_record.claimed_rewards.checked_add(staker_record.locked_rewards)
         .ok_or(UniposError::InvalidAmount)?;
@@ -306,19 +230,7 @@ fn get_unlocked_installment_rewards(now: u64, staker_record: &StakerRecord, inst
 
 #[cfg(test)]
 mod test {
-    use crate::stake::{calculate_user_rewards, get_unlocked_installment_rewards, StakerRecord};
-
-    #[test]
-    fn test_calculate_user_rewards() {
-        let cases = vec![
-            (200_000_000_000, 160, 15552000, 100), // 160%, 180 days, 100% user share
-        ];
-        for case in cases {
-            let o = calculate_user_rewards(case.0, case.1, case.2, case.3).unwrap();
-            assert!(o > 157_000_000_000);
-            assert!(o < 158_000_000_000);
-        }
-    }
+    use crate::stake::{get_unlocked_installment_rewards, StakerRecord};
 
     #[test]
     fn test_get_unlocked_installment_rewards() {
@@ -331,6 +243,7 @@ mod test {
             claimed_rewards: 0,
             unstaked: 0,
             number: 0,
+            claim_token_account: Default::default(),
         };
         let installment_num = 180;
         let a = get_unlocked_installment_rewards(now, &staker_record, installment_num).unwrap();

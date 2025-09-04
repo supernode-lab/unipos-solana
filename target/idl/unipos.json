@@ -127,6 +127,10 @@
           }
         },
         {
+          "name": "claim_token_account",
+          "writable": true
+        },
+        {
           "name": "user",
           "writable": true,
           "signer": true
@@ -364,6 +368,9 @@
           "writable": true
         },
         {
+          "name": "claim_token_account"
+        },
+        {
           "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
@@ -383,146 +390,6 @@
         },
         {
           "name": "amount",
-          "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "unstake",
-      "discriminator": [
-        90,
-        95,
-        107,
-        42,
-        205,
-        124,
-        50,
-        225
-      ],
-      "accounts": [
-        {
-          "name": "core",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  99,
-                  111,
-                  114,
-                  101
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "core_vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  99,
-                  111,
-                  114,
-                  101,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "staker"
-        },
-        {
-          "name": "staker_record",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  115,
-                  116,
-                  97,
-                  107,
-                  101,
-                  114,
-                  95,
-                  114,
-                  101,
-                  99,
-                  111,
-                  114,
-                  100
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "staker"
-              },
-              {
-                "kind": "arg",
-                "path": "number"
-              }
-            ]
-          }
-        },
-        {
-          "name": "staker_vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  115,
-                  116,
-                  97,
-                  107,
-                  101,
-                  114,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "staker"
-              }
-            ]
-          }
-        },
-        {
-          "name": "user",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-        },
-        {
-          "name": "associated_token_program",
-          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-        }
-      ],
-      "args": [
-        {
-          "name": "number",
           "type": "u64"
         }
       ]
@@ -581,19 +448,6 @@
         33,
         75,
         175
-      ]
-    },
-    {
-      "name": "UnstakeEvent",
-      "discriminator": [
-        162,
-        104,
-        137,
-        228,
-        81,
-        3,
-        79,
-        197
       ]
     }
   ],
@@ -812,22 +666,10 @@
           {
             "name": "number",
             "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "UnstakeEvent",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "user",
-            "type": "pubkey"
           },
           {
-            "name": "amount",
-            "type": "u64"
+            "name": "claim_token_account",
+            "type": "pubkey"
           }
         ]
       }
