@@ -52,6 +52,7 @@ pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
         Clock::get().unwrap().unix_timestamp as u64,
         staker_record,
         ctx.accounts.core.installment_num,
+        ctx.accounts.core.cliff_period_secs,
     )?;
     require!(staker_record.claimed_rewards < total_unlocked, UniposError::NothingToClaim);
 
@@ -213,15 +214,17 @@ pub struct RewardsClaimedEvent {
     pub amount: u64,
 }
 
-fn get_unlocked_installment_rewards(now: u64, staker_record: &StakerRecord, installment_num: u64) -> Result<u64> {
+fn get_unlocked_installment_rewards(now: u64, staker_record: &StakerRecord, installment_num: u64, cliff_period_secs: u64) -> Result<u64> {
     let total_rewards = staker_record.claimed_rewards.checked_add(staker_record.locked_rewards)
         .ok_or(UniposError::InvalidAmount)?;
     let elapsed_time = now.checked_sub(staker_record.start_time)
         .ok_or(UniposError::InvalidAmount)?;
-    let unlocked_phase = if elapsed_time >= staker_record.lock_period_secs {
+    let unlocked_phase = if elapsed_time <= cliff_period_secs {
+        0
+    } else if elapsed_time >= staker_record.lock_period_secs {
         installment_num
     } else {
-        elapsed_time.checked_mul(installment_num)
+        (elapsed_time - cliff_period_secs).checked_mul(installment_num)
             .ok_or(UniposError::InvalidAmount)?
             .checked_div(staker_record.lock_period_secs)
             .ok_or(UniposError::InvalidAmount)?
@@ -252,7 +255,7 @@ mod test {
             stakeholders_cnt: 0,
         };
         let installment_num = 180;
-        let a = get_unlocked_installment_rewards(now, &staker_record, installment_num).unwrap();
+        let a = get_unlocked_installment_rewards(now, &staker_record, installment_num, 600).unwrap();
         assert_eq!(a, 1_744_444_444);
     }
 }

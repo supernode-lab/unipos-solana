@@ -1,9 +1,0 @@
-/Users/sparkhao/code/solana/unipos-solana/target/sbf-solana-solana/release/deps/libspl_associated_token_account_client-6b8ae8de9a430f62.rmeta: /Users/sparkhao/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spl-associated-token-account-client-2.0.0/src/lib.rs /Users/sparkhao/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spl-associated-token-account-client-2.0.0/src/address.rs /Users/sparkhao/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spl-associated-token-account-client-2.0.0/src/instruction.rs
-
-/Users/sparkhao/code/solana/unipos-solana/target/sbf-solana-solana/release/deps/libspl_associated_token_account_client-6b8ae8de9a430f62.rlib: /Users/sparkhao/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spl-associated-token-account-client-2.0.0/src/lib.rs /Users/sparkhao/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spl-associated-token-account-client-2.0.0/src/address.rs /Users/sparkhao/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spl-associated-token-account-client-2.0.0/src/instruction.rs
-
-/Users/sparkhao/code/solana/unipos-solana/target/sbf-solana-solana/release/deps/spl_associated_token_account_client-6b8ae8de9a430f62.d: /Users/sparkhao/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spl-associated-token-account-client-2.0.0/src/lib.rs /Users/sparkhao/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spl-associated-token-account-client-2.0.0/src/address.rs /Users/sparkhao/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spl-associated-token-account-client-2.0.0/src/instruction.rs
-
-/Users/sparkhao/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spl-associated-token-account-client-2.0.0/src/lib.rs:
-/Users/sparkhao/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spl-associated-token-account-client-2.0.0/src/address.rs:
-/Users/sparkhao/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spl-associated-token-account-client-2.0.0/src/instruction.rs:

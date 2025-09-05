@@ -18,6 +18,7 @@ pub mod unipos {
     pub fn initialize(
         ctx: Context<Initialize>,
         lock_period: u64,
+        cliff_period: u64,
         min_stake_amount: u64,
         installment_num: u64,
     ) -> Result<()> {
@@ -25,6 +26,7 @@ pub mod unipos {
         core.admin = ctx.accounts.admin.key();
         core.mint = ctx.accounts.mint.key();
         core.lock_period_secs = lock_period;
+        core.cliff_period_secs = cliff_period;
         core.min_stake_amount = min_stake_amount;
         core.installment_num = installment_num;
         core.total_collateral = 0;
@@ -87,6 +89,7 @@ pub struct Core {
     pub lock_period_secs: u64,
     pub min_stake_amount: u64,
     pub installment_num: u64,
+    pub cliff_period_secs: u64,
 
     pub total_collateral: u64,
     pub total_claimed_rewards: u64,
