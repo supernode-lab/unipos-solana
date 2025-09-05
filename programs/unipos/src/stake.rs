@@ -67,15 +67,6 @@ pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
     core.total_claimed_rewards = core.total_claimed_rewards.checked_add(to_be_claimed)
         .ok_or(UniposError::InvalidAmount)?;
 
-    // Calculate beneficiary share
-    let user_share = core.user_reward_share;
-    let beneficiary_share_numerator = to_be_claimed.checked_mul(100 - user_share)
-        .ok_or(UniposError::InvalidAmount)?;
-    let beneficiary_share = beneficiary_share_numerator.checked_div(user_share)
-        .ok_or(UniposError::InvalidAmount)?;
-    core.beneficiary_total_rewards = core.beneficiary_total_rewards.checked_add(beneficiary_share)
-        .ok_or(UniposError::InvalidAmount)?;
-
     let transfer_ctx = CpiContext::new(
         ctx.accounts.token_program.to_account_info(),
         Transfer {
@@ -86,7 +77,6 @@ pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
     );
     let pda_sign: &[&[u8]] = &[b"core", &[ctx.bumps.core]];
     token::transfer(transfer_ctx.with_signer(&[pda_sign]), to_be_claimed)?;
-
 
     emit!(RewardsClaimedEvent {
             user: ctx.accounts.user.key(),
