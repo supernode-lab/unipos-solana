@@ -108,48 +108,6 @@ pub fn claim_stakeholder_reward(ctx: Context<StakeholderClaim>, number: u64) -> 
 	Ok(())
 }
 
-pub fn claim_stakeholder_collateral(ctx: Context<StakeholderClaim>, number: u64) -> Result<()> {
-	let stakeholder_key = ctx.accounts.stakeholder.key();
-	let staker_record = &mut ctx.accounts.staker_record;
-	require!(staker_record.unstaked == 1, UniposError::NotUnstaked);
-
-	// Find the stakeholder in the record
-	let mut num: Option<usize> = None;
-	for i in 0..staker_record.stakeholders_cnt {
-		let info = &mut staker_record.stakeholders[i as usize];
-		if info.stakeholder == stakeholder_key {
-			num = Some(i as usize);
-			break;
-		}
-	}
-	let num = num.ok_or(UniposError::StakeholderNotExists)?;
-	let stakeholder_info = &mut staker_record.stakeholders[num];
-
-	require!(stakeholder_info.claimed_collateral == 0, UniposError::NothingToClaim);
-
-	let amount = stakeholder_info.granted_collateral;
-	stakeholder_info.claimed_collateral = amount;
-
-	// Transfer rewards to stakeholder
-	let transfer_ctx = CpiContext::new(
-		ctx.accounts.token_program.to_account_info(),
-		Transfer {
-			from: ctx.accounts.staker_vault.to_account_info(),
-			to: ctx.accounts.stakeholder_token_account.to_account_info(),
-			authority: ctx.accounts.core.to_account_info(),
-		}
-	);
-	let pda_sign: &[&[u8]] = &[b"core", &[ctx.bumps.core]];
-	token::transfer(transfer_ctx.with_signer(&[pda_sign]), amount)?;
-
-	emit!(StakeholderRewardClaimedEvent {
-		stakeholder: stakeholder_key,
-		amount,
-	});
-
-	Ok(())
-}
-
 #[derive(Accounts)]
 #[instruction(number: u64)]
 pub struct AddStakeholder<'info> {

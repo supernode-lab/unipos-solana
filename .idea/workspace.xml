@@ -7,16 +7,7 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="790a5986-f85f-470c-9f80-1438c6491b76" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/programs/unipos/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/programs/unipos/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/programs/unipos/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/programs/unipos/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/programs/unipos/src/role.rs" beforeDir="false" afterPath="$PROJECT_DIR$/programs/unipos/src/role.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/programs/unipos/src/security.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/programs/unipos/src/stake.rs" beforeDir="false" afterPath="$PROJECT_DIR$/programs/unipos/src/stake.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/.rustc_info.json" beforeDir="false" afterPath="$PROJECT_DIR$/target/.rustc_info.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/deploy/unipos.so" beforeDir="false" afterPath="$PROJECT_DIR$/target/deploy/unipos.so" afterDir="false" />
-    </list>
+    <list default="true" id="790a5986-f85f-470c-9f80-1438c6491b76" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -43,7 +34,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.rust.reset.selective.auto.import&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;vesting__2.0&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;vesting&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/sparkhao/code/solana/unipos-solana&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,

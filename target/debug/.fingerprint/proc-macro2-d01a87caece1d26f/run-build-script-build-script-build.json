@@ -1,1 +1,0 @@
-{"rustc":11147673377620297040,"features":"","declared_features":"","target":0,"profile":0,"path":0,"deps":[[13790829364578928694,"build_script_build",false,13223819129446160343]],"local":[{"RerunIfChanged":{"output":"debug/build/proc-macro2-d01a87caece1d26f/output","paths":["build/probe.rs"]}}],"rustflags":["--cfg","procmacro2_semver_exempt"],"config":0,"compile_kind":0}

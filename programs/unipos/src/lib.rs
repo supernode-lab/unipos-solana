@@ -4,11 +4,9 @@ use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 
 mod stake;
-mod role;
 mod stakeholder;
 
 use stake::*;
-use role::*;
 use stakeholder::*;
 
 declare_id!("4FFs789SLFzoYK46z4eShQ1ACZJ4xuEJrKRY3Jpa5Fz7");
@@ -33,17 +31,8 @@ pub mod unipos {
         core.min_stake_amount = min_stake_amount;
         core.installment_num = installment_num;
         core.total_collateral = 0;
-        core.unstaked_collateral = 0;
         core.total_claimed_rewards = 0;
         Ok(())
-    }
-
-    pub fn init_beneficiary(ctx: Context<InitBeneficiary>) -> Result<()> {
-        role::init_beneficiary(ctx)
-    }
-
-    pub fn claim_beneficiary_rewards(ctx: Context<ClaimBeneficiaryRewards>) -> Result<()> {
-        role::claim_beneficiary_rewards(ctx)
     }
 
     pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
@@ -56,10 +45,6 @@ pub mod unipos {
 
     pub fn claim_stakeholder_reward(ctx: Context<StakeholderClaim>, number: u64) -> Result<()> {
         stakeholder::claim_stakeholder_reward(ctx, number)
-    }
-
-    pub fn claim_stakeholder_collateral(ctx: Context<StakeholderClaim>, number: u64) -> Result<()> {
-        stakeholder::claim_stakeholder_collateral(ctx, number)
     }
 
     pub fn claim_rewards(ctx: Context<ClaimRewards>, number: u64) -> Result<()> {
@@ -93,9 +78,6 @@ pub struct Initialize<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
 
-    /// CHECK: NO NEED
-    pub provider: AccountInfo<'info>,
-
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
@@ -104,22 +86,14 @@ pub struct Initialize<'info> {
 #[account]
 pub struct Core {
     pub admin: Pubkey,
-    pub pending_provider: Pubkey,
-    pub provider: Pubkey,
     pub mint: Pubkey,
     pub lock_period_secs: u64,
     pub user_reward_share: u64,
-    pub apy_percentage: u64,
     pub min_stake_amount: u64,
     pub installment_num: u64,
 
     pub total_collateral: u64,
-    pub unstaked_collateral: u64,
-    pub allowed_collateral: u64,
-
     pub total_claimed_rewards: u64,
-
-    pub total_security_deposit: u64,
 
     pub beneficiary: Pubkey,
     pub beneficiary_total_rewards: u64,

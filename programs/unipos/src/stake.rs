@@ -9,10 +9,6 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
     require!(amount > 0, UniposError::InvalidAmount);
     require!(amount >= ctx.accounts.core.min_stake_amount, UniposError::AmountTooSmall);
     let new_total = ctx.accounts.core.total_collateral.checked_add(amount).ok_or_else(|| UniposError::InsufficientAllowance)?;
-    require!(
-        new_total <= ctx.accounts.core.allowed_collateral,
-        UniposError::InsufficientAllowance
-    );
 
     // Transfer tokens from user to core
     let cpi_accounts = Transfer {
