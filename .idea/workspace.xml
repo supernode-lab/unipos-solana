@@ -9,7 +9,114 @@
   <component name="ChangeListManager">
     <list default="true" id="790a5986-f85f-470c-9f80-1438c6491b76" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/programs/unipos/src/stake.rs" beforeDir="false" afterPath="$PROJECT_DIR$/programs/unipos/src/stake.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/.fingerprint/unipos-271f580b0d355735/dep-test-lib-unipos" beforeDir="false" afterPath="$PROJECT_DIR$/target/debug/.fingerprint/unipos-271f580b0d355735/dep-test-lib-unipos" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/.fingerprint/unipos-271f580b0d355735/output-test-lib-unipos" beforeDir="false" afterPath="$PROJECT_DIR$/target/debug/.fingerprint/unipos-271f580b0d355735/output-test-lib-unipos" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/deps/unipos-271f580b0d355735" beforeDir="false" afterPath="$PROJECT_DIR$/target/debug/deps/unipos-271f580b0d355735" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/04d2sbo8xltu5d21nu86jtbkd.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/08xf41vbzfktvxtetu3ldifxs.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/0dila4j5hi3gd2bmpcsn2lub0.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/0lnrkllzh256o3vuyejy8oomn.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/0qtbxzcyzv2p1yi74z7pj9r5l.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/15h7lqxm2zjdtyijbrcozyqyt.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/1lgxrtghb0fqqrzoiks2uyuyu.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/1n1rbihhlu867flwlzmy037nz.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/1n41vh46dps3v1ldfcx500ih0.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/1nwn18urek4ppg50nfzbe0el0.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/1p9vzjl3yc31m1qeqq1ti066k.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/1s7k9phve3hmo77wo9fr3w6nm.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/1t6hcxiwhkcqpkciudwf5l4it.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/1twhvm49dbv71x7f4onhb6pdg.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/1yzqxhsk5vhrbgbb0n6bxqi02.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/20zvuo5mmj9c6bvb4duylhe69.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/2948x4gntcztfhql6l8zy00ie.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/2di5t8jcdbvttmy7t1y5uxdi0.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/2ggq0v0pk8nllsozlwuzq4jn9.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/2hh2t3vev5dgkqmxsa1wajvub.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/2knaoov12fitrm5wjyod7bb4y.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/2nfrbs30qh9sv22u64w2x392t.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/2vlznnphtmoeu9hjfgfq8f0ju.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/2w2jz04q86ukbsn77vvcxnhzp.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/376drgsfgu78r6swbk7mcdqe3.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/3dxgqcjr0ywudu3lrrwfxdhbp.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/3h4i4showytvi905oni23dc48.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/3ih52cnuux88gk7q39pskrmbe.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/3rr3yrenwf7szqhvw1ms87aqb.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/3tsdmzcvra80xsw8i567zykc8.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/3uvvwz4kmo5t8b6kx62hskpxw.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/3y09qjmg0o10c95pb5as4eci1.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/3y712cajdd722yl400qxjv0i6.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/43q23l577f112w86z84emtfgk.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/4aot633sv8xesmykian0cqq9t.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/4ea356qhenofk09xjxgiwd8xl.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/4h9wapnz1ad78aap23udt8gie.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/4lv7q6pft3yeicws7pi6a0baw.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/4r9l2ts2ci6jzvy0tr0rc70lx.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/50h0ra8pe5gituzk789yb5adx.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/52eilog9vkeqlvjj9yu5z4nfq.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/57qhuehxjmwb1yc8b5ha74unn.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/5o8nnkmkx8mlkyazxtresj841.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/5uesngpdp1sel7hq2767h1q4r.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/6gwzb4bs8hd0dlr5sfobgezes.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/6hcx8k7kqhhuprmudrry6o6o2.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/6nj0oaxg90aa0c41iy3uw3eb6.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/6tts3isi80k9wgq33pk832m83.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/79qj9py9lvtqlfaghhg2r0k2z.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/7fifjlbadxb1fm1ygao3ifflk.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/7o2zwek0056uc4svfyzin1oei.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/7q6gkpod18j3picltnkpgcpub.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/7r3gnfnq0tw9kjeyaj8apj0ni.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/7va5bt8a46u0yl795taeh67r5.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/7y03hrmit3k1owamf74z2u5wj.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/81g3rz0tz5aq82e50f4chl37k.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/842wy4eg2wazezojelr7otpqx.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/861xgkulzeh5qqnlifxrnsmq0.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/87h20h2cl6hlrbeyggfx2hsvg.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/88jro0109shb3cawqyn9egc51.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/8ljj0eag5i2jnyl6saxc2dy49.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/8wnf4zybruniavnh7zllhn2tx.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/8yordxnt0yap4q4hj0jm2t8gu.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/931we3ieopfp40omauidx57k2.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/9ioq9ntfk3ts7del1vwf31g7c.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/9q52rpi0txik5e0cp74shzjc5.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/9x21j0g2iqb20sccw89as2s7v.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/a6xaick6pongg4ec4wpjvluzg.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/arspb3bu8s8feeqlkjyj6ybj3.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/as7orh7aov777b9jx2j38vpp8.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/auztt3rrqzmnmkqz8rkaw3gzp.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/azdpvf274yfae1tx6d5hgw9jy.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/b7ps5zv7a6ymnurhssf5y3o5y.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/bg0jzyi75h284jx7y5ba2ufoo.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/bk795uxo4kwvlc9q6mm063wje.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/bw9werczaz9dmrgdku7o3e31o.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/c1dgn2nqr14umz8ypsuh36epn.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/c2ue1yzichh4qd6y3oqdililh.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/c3m830zarq37agmy9owb12swg.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/c50zi1k91cd0wtg5hglunph88.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/cj7fmgaee8wajfqb4e25kxaz7.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/cjvrr39y0d4v4hbaqps9lz84m.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/cr4t2nfrpyey6adhqln5l34lb.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/d9nhlsaauokjsa93txwoxz623.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/ddht7tdaceesjxv0lrzirwrg7.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/demi13rkkqgixygmlnl65bvko.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/dep-graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/dfgi31u27oh9by4n8oidve7qd.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/dk61fbrqrp29q96r69sh430nk.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/dr2hbygzgqzjzveht0uiovckj.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/dv4wtsggrjnarug02j8s2oti6.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/e1b2m0p4nfgy9sr5har89r14s.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/e1wa15o03behow84ot3rw17ku.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/ef92z1svjr6krz1xy4se97w4w.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/efyl43hcc55gblh2nd6vz78kf.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/ekwsfwjcna7b2hnrboo6w26iq.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/eylmg13gzzguva9vpt4j1d2tn.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/query-cache.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7-0369jzshkw1t8r20c25wryvk6/work-products.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/debug/incremental/unipos-3swcxosbkbadc/s-hasn0k0lor-09dgum7.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/deploy/unipos.so" beforeDir="false" afterPath="$PROJECT_DIR$/target/deploy/unipos.so" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/sbf-solana-solana/release/deps/libunipos.rlib" beforeDir="false" afterPath="$PROJECT_DIR$/target/sbf-solana-solana/release/deps/libunipos.rlib" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/sbf-solana-solana/release/deps/unipos.so" beforeDir="false" afterPath="$PROJECT_DIR$/target/sbf-solana-solana/release/deps/unipos.so" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/sbf-solana-solana/release/libunipos.rlib" beforeDir="false" afterPath="$PROJECT_DIR$/target/sbf-solana-solana/release/libunipos.rlib" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/sbf-solana-solana/release/unipos.so" beforeDir="false" afterPath="$PROJECT_DIR$/target/sbf-solana-solana/release/unipos.so" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
