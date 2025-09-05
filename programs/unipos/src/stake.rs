@@ -226,7 +226,7 @@ fn get_unlocked_installment_rewards(now: u64, staker_record: &StakerRecord, inst
     } else {
         (elapsed_time - cliff_period_secs).checked_mul(installment_num)
             .ok_or(UniposError::InvalidAmount)?
-            .checked_div(staker_record.lock_period_secs)
+            .checked_div(staker_record.lock_period_secs - cliff_period_secs)
             .ok_or(UniposError::InvalidAmount)?
     };
     Ok(total_rewards.checked_mul(unlocked_phase)
