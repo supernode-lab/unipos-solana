@@ -36,8 +36,8 @@ pub mod unipos {
         stake::stake(ctx, number, amount)
     }
 
-    pub fn add_stakeholder(ctx: Context<AddStakeholder>, number: u64, granted_reward: u64, granted_collateral: u64) -> Result<()> {
-        stakeholder::add_stakeholder(ctx, number, granted_reward, granted_collateral)
+    pub fn add_stakeholder(ctx: Context<AddStakeholder>, number: u64, granted_reward: u64) -> Result<()> {
+        stakeholder::add_stakeholder(ctx, number, granted_reward)
     }
 
     pub fn claim_stakeholder_reward(ctx: Context<StakeholderClaim>, number: u64) -> Result<()> {

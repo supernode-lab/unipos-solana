@@ -25,7 +25,6 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
     // Create new stake record
     let staker_record = &mut ctx.accounts.staker_record;
     staker_record.staker = ctx.accounts.staker.key();
-    staker_record.collateral = amount;
     staker_record.start_time = Clock::get()?.unix_timestamp as u64;
     staker_record.lock_period_secs = ctx.accounts.core.lock_period_secs;
     staker_record.locked_rewards = amount;
@@ -182,7 +181,6 @@ pub struct ClaimRewards<'info> {
 #[account]
 pub struct StakerRecord {
     pub staker: Pubkey,
-    pub collateral: u64,
     pub start_time: u64,
     pub lock_period_secs: u64,
     pub locked_rewards: u64,
@@ -191,7 +189,6 @@ pub struct StakerRecord {
     pub number: u64,
 
     pub granted_reward: u64,
-    pub granted_collateral: u64,
     pub stakeholders: Vec<StakeholderInfo>,
     pub stakeholders_cnt: u8,
 }
@@ -244,7 +241,6 @@ mod test {
         let now = 86400 * 3;
         let staker_record = StakerRecord {
             staker: Default::default(),
-            collateral: 200000000000,
             start_time: 86400,
             lock_period_secs: 15552000,
             locked_rewards: 157_000_000_000,
@@ -252,7 +248,6 @@ mod test {
             unstaked: 0,
             number: 0,
             granted_reward: 0,
-            granted_collateral: 0,
             stakeholders: vec![],
             stakeholders_cnt: 0,
         };

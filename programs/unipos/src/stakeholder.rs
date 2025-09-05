@@ -6,7 +6,7 @@ use crate::stake::StakerRecord;
 
 pub const MAX_STAKEHOLDERS: u8 = 32;
 
-pub fn add_stakeholder(ctx: Context<AddStakeholder>, number: u64, granted_reward: u64, granted_collateral: u64) -> Result<()> {
+pub fn add_stakeholder(ctx: Context<AddStakeholder>, number: u64, granted_reward: u64) -> Result<()> {
 	let staker_record = &mut ctx.accounts.staker_record;
 
 	// Check if new grants exceed available amounts
@@ -18,13 +18,7 @@ pub fn add_stakeholder(ctx: Context<AddStakeholder>, number: u64, granted_reward
 		new_total_granted_reward <= total_available_rewards,
 		UniposError::InsufficientAllowance
 	);
-	
-	let new_total_granted_collateral = staker_record.granted_collateral.checked_add(granted_collateral)
-		.ok_or(UniposError::InvalidAmount)?;
-	require!(
-		new_total_granted_collateral <= staker_record.collateral,
-		UniposError::InsufficientAllowance
-	);
+
 	require!(staker_record.stakeholders_cnt <= MAX_STAKEHOLDERS, UniposError::InsufficientAllowance);
 
 	let stakeholder = ctx.accounts.stakeholder.key();
@@ -35,12 +29,8 @@ pub fn add_stakeholder(ctx: Context<AddStakeholder>, number: u64, granted_reward
 		stakeholder: ctx.accounts.stakeholder.key(),
 		granted_reward,
 		claimed_reward: 0,
-		granted_collateral,
-		claimed_collateral: 0,
 	});
 	staker_record.stakeholders_cnt = staker_record.stakeholders_cnt.checked_add(1)
-		.ok_or(UniposError::InvalidAmount)?;
-	staker_record.granted_collateral = staker_record.granted_collateral.checked_add(granted_collateral)
 		.ok_or(UniposError::InvalidAmount)?;
 	staker_record.granted_reward = staker_record.granted_reward.checked_add(granted_reward)
 		.ok_or(UniposError::InvalidAmount)?;
@@ -49,7 +39,6 @@ pub fn add_stakeholder(ctx: Context<AddStakeholder>, number: u64, granted_reward
 		staker: ctx.accounts.staker.key(),
 		stakeholder,
 		granted_reward,
-		granted_collateral,
 	});
 
 	Ok(())
@@ -168,8 +157,6 @@ pub struct StakeholderInfo {
 	pub stakeholder: Pubkey,
 	pub granted_reward: u64,
 	pub claimed_reward: u64,
-	pub granted_collateral: u64,
-	pub claimed_collateral: u64,
 }
 
 #[event]
@@ -177,7 +164,6 @@ pub struct StakeholderAddedEvent {
     pub staker: Pubkey,
     pub stakeholder: Pubkey,
     pub granted_reward: u64,
-    pub granted_collateral: u64,
 }
 
 #[event]
