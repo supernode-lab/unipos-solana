@@ -142,7 +142,10 @@ pub struct StakeholderClaim<'info> {
     /// CHECK: no need
     pub staker: AccountInfo<'info>,
 
-    #[account(mut)]
+	#[account(
+        mut,
+        constraint = stakeholder_token_account.owner == stakeholder.key() @ UniposError::InvalidStakeholderTokenAccount
+	)]
     pub stakeholder_token_account: Account<'info, TokenAccount>,
 
     #[account(mut)]
