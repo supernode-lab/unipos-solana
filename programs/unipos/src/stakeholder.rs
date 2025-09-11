@@ -22,8 +22,7 @@ pub fn add_stakeholder(ctx: Context<AddStakeholder>, number: u64, granted_reward
 	require!(staker_record.stakeholders_cnt <= MAX_STAKEHOLDERS, UniposError::InsufficientAllowance);
 
 	let stakeholder = ctx.accounts.stakeholder.key();
-	let exists = staker_record.stakeholders.iter().find(|x| x.stakeholder == stakeholder);
-	require!(exists.is_none(), UniposError::StakeholderExists);
+
 	// Add new stakeholder
 	staker_record.stakeholders.push(StakeholderInfo {
 		stakeholder: ctx.accounts.stakeholder.key(),
@@ -53,29 +52,27 @@ pub fn claim_stakeholder_reward(ctx: Context<StakeholderClaim>, number: u64) -> 
 	let total_rewards = claimed_rewards.checked_add(staker_record.locked_rewards)
 		.ok_or(UniposError::InvalidAmount)?;
 
+	msg!("total_rewards: {}, claimed_rewards: {}", total_rewards, claimed_rewards);
 	// Find the stakeholder in the record
-	let mut num: Option<usize> = None;
+	let mut claimable_total_reward = 0;
 	for i in 0..staker_record.stakeholders_cnt {
 		let info = &mut staker_record.stakeholders[i as usize];
 		if info.stakeholder == stakeholder_key {
-			num = Some(i as usize);
-			break;
+			let claimable_reward = (info.granted_reward as u128 * claimed_rewards as u128).checked_div(total_rewards as u128).ok_or(UniposError::InvalidAmount)? as u64;
+			msg!("index: {}, claimable_reward: {}", i, claimable_reward);
+			if claimable_reward == 0 {
+				continue;
+			}
+
+			let claimable_reward_record = claimable_reward.checked_sub(info.claimed_reward)
+				.ok_or(UniposError::InvalidAmount)?;
+			info.claimed_reward = claimable_reward;
+			claimable_total_reward += claimable_reward_record;
 		}
 	}
-	let num = num.ok_or(UniposError::StakeholderNotExists)?;
-	let stakeholder_info = &mut staker_record.stakeholders[num];
-
-	msg!("before calculate claimable total reward");
+	msg!("after calculate total_rewards: {}", claimable_total_reward);
 	// Calculate claimable rewards
-	let claimable_total_reward = (stakeholder_info.granted_reward as u128 * claimed_rewards as u128).checked_div(total_rewards as u128).ok_or(UniposError::InvalidAmount)? as u64;
-	require!(claimable_total_reward > stakeholder_info.claimed_reward, UniposError::NothingToClaim);
-
-	msg!("before calculate claimable_reward");
-	let claimable_reward = claimable_total_reward.checked_sub(stakeholder_info.claimed_reward)
-		.ok_or(UniposError::InvalidAmount)?;
-
-	// Update claimed rewards
-	stakeholder_info.claimed_reward = claimable_total_reward;
+	require!(claimable_total_reward > 0, UniposError::NothingToClaim);
 
 	// Transfer rewards to stakeholder
 	let transfer_ctx = CpiContext::new(
@@ -87,11 +84,11 @@ pub fn claim_stakeholder_reward(ctx: Context<StakeholderClaim>, number: u64) -> 
 		}
 	);
 	let pda_sign: &[&[u8]] = &[b"core", &[ctx.bumps.core]];
-	token::transfer(transfer_ctx.with_signer(&[pda_sign]), claimable_reward)?;
+	token::transfer(transfer_ctx.with_signer(&[pda_sign]), claimable_total_reward)?;
 
 	emit!(StakeholderRewardClaimedEvent {
 		stakeholder: stakeholder_key,
-		amount: claimable_reward,
+		amount: claimable_total_reward,
 	});
 
 	Ok(())
