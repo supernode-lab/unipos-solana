@@ -29,7 +29,6 @@ pub fn stake(ctx: Context<Stake>, number: u64, amount: u64) -> Result<()> {
     staker_record.lock_period_secs = ctx.accounts.core.lock_period_secs;
     staker_record.locked_rewards = amount;
     staker_record.claimed_rewards = 0;
-    staker_record.unstaked = 0;
     staker_record.number = number;
 
     // Update stake core state
@@ -186,7 +185,6 @@ pub struct StakerRecord {
     pub lock_period_secs: u64,
     pub locked_rewards: u64,
     pub claimed_rewards: u64,
-    pub unstaked: u8,
     pub number: u64,
 
     pub granted_reward: u64,
@@ -248,7 +246,6 @@ mod test {
             lock_period_secs: 15552000,
             locked_rewards: 157_000_000_000,
             claimed_rewards: 0,
-            unstaked: 0,
             number: 0,
             granted_reward: 0,
             stakeholders: vec![],
