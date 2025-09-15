@@ -143,6 +143,7 @@ pub struct Core {
     pub apy_percentage: u64,
     pub min_stake_amount: u64,
     pub installment_num: u64,
+    pub cliff_period_secs: u64,
 
     pub total_collateral: u64,
     pub unstaked_collateral: u64,
