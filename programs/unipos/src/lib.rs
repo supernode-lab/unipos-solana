@@ -199,4 +199,6 @@ pub enum UniposError {
     NoLockedToken,
     #[msg("Not unstaked")]
     NotUnstaked,
+    #[msg("Invalid stakeholder_token_account")]
+    InvalidStakeholderTokenAccount,
 }
