@@ -39,7 +39,6 @@ pub mod unipos {
         core.min_stake_amount = min_stake_amount;
         core.installment_num = installment_num;
         core.cliff_period_secs = cliff_period;
-
         core.total_collateral = 0;
         core.unstaked_collateral = 0;
         core.total_claimed_rewards = 0;
@@ -106,7 +105,7 @@ pub struct Initialize<'info> {
     #[account(
         init,
         payer = admin,
-        space = 8 + 12 * 8 + 5 * 32,
+        space = 8 + 13 * 8 + 5 * 32,
         seeds = [b"core"],
         bump
     )]
