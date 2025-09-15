@@ -10,7 +10,6 @@
     <list default="true" id="e6114801-003c-440b-8fd4-ea5a49a5604a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/programs/unipos/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/programs/unipos/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/programs/unipos/src/stake.rs" beforeDir="false" afterPath="$PROJECT_DIR$/programs/unipos/src/stake.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

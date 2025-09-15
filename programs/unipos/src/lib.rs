@@ -26,6 +26,7 @@ pub mod unipos {
         apy: u64,
         min_stake_amount: u64,
         installment_num: u64,
+        cliff_period: u64,
     ) -> Result<()> {
         let core = &mut ctx.accounts.core;
         core.admin = ctx.accounts.admin.key();
@@ -37,6 +38,8 @@ pub mod unipos {
         core.apy_percentage = apy;
         core.min_stake_amount = min_stake_amount;
         core.installment_num = installment_num;
+        core.cliff_period_secs = cliff_period;
+
         core.total_collateral = 0;
         core.unstaked_collateral = 0;
         core.total_claimed_rewards = 0;
