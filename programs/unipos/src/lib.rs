@@ -56,7 +56,7 @@ pub struct Initialize<'info> {
     #[account(
         init,
         payer = admin,
-        space = 8 + 12 * 8 + 5 * 32,
+        space = 8 + 6 * 8 + 2 * 32,
         seeds = [b"core"],
         bump
     )]
