@@ -13,7 +13,7 @@ use role::*;
 use stakeholder::*;
 use security::*;
 
-declare_id!("4FFs789SLFzoYK46z4eShQ1ACZJ4xuEJrKRY3Jpa5Fz7");
+declare_id!("558JotJQb8uQtmHCRT58W7WeTiULDPBV3Mmciz3E4Fmk");
 
 #[program]
 pub mod unipos {
@@ -26,6 +26,7 @@ pub mod unipos {
         apy: u64,
         min_stake_amount: u64,
         installment_num: u64,
+        cliff_period: u64,
     ) -> Result<()> {
         let core = &mut ctx.accounts.core;
         core.admin = ctx.accounts.admin.key();
@@ -37,6 +38,7 @@ pub mod unipos {
         core.apy_percentage = apy;
         core.min_stake_amount = min_stake_amount;
         core.installment_num = installment_num;
+        core.cliff_period_secs = cliff_period;
         core.total_collateral = 0;
         core.unstaked_collateral = 0;
         core.total_claimed_rewards = 0;
@@ -103,7 +105,7 @@ pub struct Initialize<'info> {
     #[account(
         init,
         payer = admin,
-        space = 8 + 12 * 8 + 5 * 32,
+        space = 8 + 13 * 8 + 5 * 32,
         seeds = [b"core"],
         bump
     )]
@@ -143,6 +145,7 @@ pub struct Core {
     pub apy_percentage: u64,
     pub min_stake_amount: u64,
     pub installment_num: u64,
+    pub cliff_period_secs: u64,
 
     pub total_collateral: u64,
     pub unstaked_collateral: u64,
@@ -199,4 +202,6 @@ pub enum UniposError {
     NoLockedToken,
     #[msg("Not unstaked")]
     NotUnstaked,
+    #[msg("Invalid stakeholder_token_account")]
+    InvalidStakeholderTokenAccount,
 }
