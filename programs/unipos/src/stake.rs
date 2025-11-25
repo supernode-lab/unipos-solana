@@ -162,8 +162,6 @@ pub struct Stake<'info> {
     )]
     pub core_vault: Account<'info, TokenAccount>,
 
-    pub mint: Account<'info, Mint>,
-
     #[account(
         init,
         payer = user,
@@ -176,15 +174,6 @@ pub struct Stake<'info> {
     /// CHECK: no need
     pub staker: AccountInfo<'info>,
 
-    #[account(
-        init_if_needed,
-        payer = user,
-        token::mint = mint,
-        token::authority = core,
-        seeds = [b"staker_vault", staker.key().as_ref()],
-        bump,
-    )]
-    pub staker_vault: Account<'info, TokenAccount>,
 
     #[account(mut)]
     pub user: Signer<'info>,
@@ -194,7 +183,6 @@ pub struct Stake<'info> {
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
-    pub associated_token_program: Program<'info, AssociatedToken>,
 }
 
 #[derive(Accounts)]
@@ -316,7 +304,7 @@ pub struct RewardsClaimedEvent {
     pub amount: u64,
 }
 
-fn calculate_user_rewards(amount: u128, apy_percentage: u128, lock_period_secs: u128, user_reward_share: u128) -> Result<u64> {
+pub fn calculate_user_rewards(amount: u128, apy_percentage: u128, lock_period_secs: u128, user_reward_share: u128) -> Result<u64> {
     let total_rewards = amount.checked_mul(apy_percentage)
         .ok_or(UniposError::InvalidAmount)?
         .checked_mul(lock_period_secs)

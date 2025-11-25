@@ -3,15 +3,15 @@ use anchor_lang::{account, emit, require, AnchorDeserialize, AnchorSerialize, Ke
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 
-mod stake;
 mod role;
-mod stakeholder;
 mod security;
+mod stake;
+mod stakeholder;
 
-use stake::*;
-use role::*;
-use stakeholder::*;
-use security::*;
+pub use role::*;
+pub use security::*;
+pub use stake::*;
+pub use stakeholder::*;
 
 declare_id!("4FFs789SLFzoYK46z4eShQ1ACZJ4xuEJrKRY3Jpa5Fz7");
 
@@ -69,7 +69,12 @@ pub mod unipos {
         stake::unstake(ctx, number)
     }
 
-    pub fn add_stakeholder(ctx: Context<AddStakeholder>, number: u64, granted_reward: u64, granted_collateral: u64) -> Result<()> {
+    pub fn add_stakeholder(
+        ctx: Context<AddStakeholder>,
+        number: u64,
+        granted_reward: u64,
+        granted_collateral: u64,
+    ) -> Result<()> {
         stakeholder::add_stakeholder(ctx, number, granted_reward, granted_collateral)
     }
 

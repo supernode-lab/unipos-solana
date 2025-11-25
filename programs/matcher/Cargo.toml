@@ -1,12 +1,12 @@
 [package]
-name = "unipos"
+name = "matcher"
 version = "0.1.0"
 description = "Created with Anchor"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "unipos"
+name = "switch"
 
 [features]
 default = []
@@ -15,8 +15,18 @@ no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
 idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+anchor-debug = []
+custom-heap = []
+custom-panic = []
+
 
 [dependencies]
-anchor-lang = { workspace = true, features = ["init-if-needed"] }
+anchor-lang = { workspace = true }
 anchor-spl = { workspace = true }
-proc-macro2 = { workspace = true }
+common = { workspace = true }
+unipos = { path = "../unipos", features = ["cpi"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("solana"))'] }
+
+
